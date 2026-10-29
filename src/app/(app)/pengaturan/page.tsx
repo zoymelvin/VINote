@@ -12,6 +12,7 @@ export default function PengaturanPage() {
   const router = useRouter();
   async function signOut() {
     const supabase = createClient();
+    if (!supabase) return;
     await supabase.auth.signOut();
     router.push("/login");
   }

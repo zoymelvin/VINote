@@ -9,11 +9,13 @@ export default function LoginPage() {
   const [sent, setSent] = useState(false);
   async function send() {
     const supabase = createClient();
+    if (!supabase) return;
     await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
     setSent(true);
   }
   async function google() {
     const supabase = createClient();
+    if (!supabase) return;
     await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
   }
   return (

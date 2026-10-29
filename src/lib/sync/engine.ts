@@ -37,6 +37,7 @@ export async function enqueue(table: string, op: "upsert" | "delete", payload: u
 }
 
 export async function processOutbox(supabase = createClient()) {
+  if (!supabase) return;
   const items = await db.outbox.orderBy("createdAt").toArray();
   for (const item of items) {
     try {
@@ -65,6 +66,7 @@ export async function setLastSync(v: number) {
 }
 
 export async function pullNotes(supabase = createClient(), userId?: string) {
+  if (!supabase) return;
   const last = await getLastSync();
   let q = supabase.from("notes").select("*").gt("updated_at", new Date(last || 0).toISOString());
   if (userId) q = q.eq("user_id", userId);
@@ -93,11 +95,12 @@ export async function pullNotes(supabase = createClient(), userId?: string) {
 
 export async function syncAll(userId?: string) {
   await processOutbox();
-  await pullNotes(createClient(), userId);
+  await pullNotes(createClient() ?? undefined, userId);
 }
 
 export function subscribeRealtime(userId: string, onChange: (note: Note) => void) {
   const supabase = createClient();
+  if (!supabase) return () => {};
   const channel = supabase
     .channel("notes-realtime")
     .on("postgres_changes", { event: "*", schema: "public", table: "notes", filter: `user_id=eq.${userId}` }, (payload) => {
