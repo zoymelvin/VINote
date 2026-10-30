@@ -10,10 +10,6 @@ const themes = ["light", "dark"];
 
 fs.mkdirSync("/tmp/vinote-ui", { recursive: true });
 
-function parsePx(v) {
-  return parseFloat(String(v).replace("px", "")) || 0;
-}
-
 function rgbContrast(fg, bg) {
   function chan(c) {
     const v = c / 255;
