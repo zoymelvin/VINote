@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export function Button({ className, variant = "primary", size = "md", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "ghost" | "danger"; size?: "sm" | "md" | "lg" }) {
-  const base = "inline-flex items-center justify-center gap-2 rounded-2xl font-medium transition active:scale-[0.98] disabled:opacity-50";
+  const base = "inline-flex items-center justify-center gap-2 rounded-2xl font-medium transition active:scale-[0.97] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
   const variants = {
     primary: "bg-[var(--accent)] text-white shadow-[var(--shadow-1)] hover:opacity-95",
     secondary: "bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]",
@@ -14,5 +14,5 @@ export function Button({ className, variant = "primary", size = "md", ...props }
 }
 
 export function IconButton({ label, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
-  return <button aria-label={label} className={cn("inline-flex h-11 w-11 items-center justify-center rounded-2xl hover:bg-[var(--card-muted)] active:scale-95", className)} {...props} />;
+  return <button aria-label={label} className={cn("inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-2xl hover:bg-[var(--card-muted)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]", className)} {...props} />;
 }
