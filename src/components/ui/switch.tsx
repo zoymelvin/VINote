@@ -9,7 +9,7 @@ export function Switch({ checked, onCheckedChange, label }: { checked: boolean; 
       aria-checked={checked}
       aria-label={label}
       onClick={() => onCheckedChange(!checked)}
-      className={cn("relative h-7 w-12 rounded-full transition", checked ? "bg-[var(--accent)]" : "bg-[var(--border)]")}
+      className={cn("relative h-7 w-12 min-h-[44px] min-w-[44px] rounded-full transition", checked ? "bg-[var(--accent)]" : "bg-[var(--border)]")}
     >
       <span className={cn("absolute top-1 h-5 w-5 rounded-full bg-white transition", checked ? "left-6" : "left-1")} />
     </button>

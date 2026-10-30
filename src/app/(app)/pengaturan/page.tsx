@@ -32,7 +32,7 @@ export default function PengaturanPage() {
         <h2 className="font-semibold">Warna aksen</h2>
         <div className="flex flex-wrap gap-2">
           {["indigo", "rose", "sky", "emerald", "violet", "slate", "orange", "teal"].map((a) => (
-            <button key={a} onClick={() => setAccent(a)} className="h-8 w-8 rounded-full border" style={{ background: a }} aria-label={a} />
+            <button key={a} onClick={() => setAccent(a)} className="h-11 w-11 rounded-full border" style={{ background: a }} aria-label={a} />
           ))}
         </div>
       </section>

@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button
             onClick={() => setCollapsed((v) => !v)}
             aria-label={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
             {collapsed ? <PanelLeftOpen size={20} strokeWidth={1.75} /> : <PanelLeftClose size={20} strokeWidth={1.75} />}
           </button>
