@@ -1,6 +1,7 @@
 "use client";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +19,7 @@ export default function PengaturanPage() {
   }
   return (
     <div className="p-4 md:p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Pengaturan</h1>
+      <PageHeader title="Pengaturan" />
       <section className="space-y-3">
         <h2 className="font-semibold">Tema</h2>
         <div className="flex gap-2">
