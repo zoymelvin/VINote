@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ToastHost } from "@/components/ui/toast";
 import { Icon } from "@/components/ui/icon";
 import { createNote } from "@/lib/db/repo";
+import type { Note } from "@/lib/notes/types";
 import * as m from "motion/react-m";
 
 const tabs = [
@@ -16,7 +17,7 @@ const tabs = [
   { href: "/pengaturan", label: "Pengaturan", icon: Settings },
 ];
 
-const noteTypes: { type: Parameters<typeof createNote>[0]["type"]; label: string }[] = [
+const noteTypes: { type: Note["type"]; label: string }[] = [
   { type: "text", label: "Teks" },
   { type: "checklist", label: "Checklist" },
   { type: "markdown", label: "Markdown" },

@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function NoteCard({ note }: { note: { id: string; title?: string; contentText?: string; color: string; isPinned?: boolean } }) {
+export function NoteCard({ note }: { note: { id: string; title?: string; contentText?: string; color: string; isPinned?: boolean; type: string } }) {
   const toast = useToast();
   async function remove() {
     await softDeleteNote(note.id);
