@@ -2,7 +2,14 @@ import type { NextConfig } from "next";
 import withSerwist from "@serwist/next";
 
 const nextConfig: NextConfig = {
-  turbopack: {},
+  turbopack: {
+    rules: {
+      "*.css": {
+        loaders: ["@tailwindcss/turbopack"],
+        as: "*.css",
+      },
+    },
+  },
 };
 
 export default withSerwist({
