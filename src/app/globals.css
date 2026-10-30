@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --background: #f7f7fb;
   --foreground: #111827;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --text: #111827;
+  --text-muted: #6b7280;
   --card: #ffffff;
   --card-muted: #f1f5f9;
   --border: #e5e7eb;
@@ -10,20 +15,62 @@
   --accent: #6366f1;
   --accent-2: #8b5cf6;
   --radius: 24px;
+  --radius-sm: 16px;
   --shadow-1: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
   --shadow-2: 0 2px 4px rgba(0,0,0,.05), 0 16px 40px rgba(0,0,0,.08);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --note-1-bg: #fef3c7; --note-1-fg: #78350f;
+  --note-2-bg: #ffe4e6; --note-2-fg: #881337;
+  --note-3-bg: #e0f2fe; --note-3-fg: #0c4a6e;
+  --note-4-bg: #d1fae5; --note-4-fg: #064e3b;
+  --note-5-bg: #ede9fe; --note-5-fg: #4c1d95;
+  --note-6-bg: #f1f5f9; --note-6-fg: #1e293b;
+  --note-7-bg: #ffedd5; --note-7-fg: #7c2d12;
+  --note-8-bg: #ccfbf1; --note-8-fg: #134e4a;
+
+  --note-amber-bg: #fef3c7; --note-amber-fg: #78350f;
+  --note-rose-bg: #ffe4e6; --note-rose-fg: #881337;
+  --note-sky-bg: #e0f2fe; --note-sky-fg: #0c4a6e;
+  --note-emerald-bg: #d1fae5; --note-emerald-fg: #064e3b;
+  --note-violet-bg: #ede9fe; --note-violet-fg: #4c1d95;
+  --note-slate-bg: #f1f5f9; --note-slate-fg: #1e293b;
+  --note-orange-bg: #ffedd5; --note-orange-fg: #7c2d12;
+  --note-teal-bg: #ccfbf1; --note-teal-fg: #134e4a;
 }
 
 .dark {
+  color-scheme: dark;
   --background: #0b0b12;
   --foreground: #f3f4f6;
+  --surface: #151521;
+  --surface-2: #1e1e2e;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
   --card: #151521;
   --card-muted: #1e1e2e;
   --border: #27273a;
   --muted: #9ca3af;
   --shadow-1: 0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3);
   --shadow-2: 0 2px 4px rgba(0,0,0,.25), 0 16px 40px rgba(0,0,0,.4);
+
+  --note-1-bg: #78350f; --note-1-fg: #fef3c7;
+  --note-2-bg: #881337; --note-2-fg: #ffe4e6;
+  --note-3-bg: #0c4a6e; --note-3-fg: #e0f2fe;
+  --note-4-bg: #064e3b; --note-4-fg: #d1fae5;
+  --note-5-bg: #4c1d95; --note-5-fg: #ede9fe;
+  --note-6-bg: #1e293b; --note-6-fg: #f1f5f9;
+  --note-7-bg: #7c2d12; --note-7-fg: #ffedd5;
+  --note-8-bg: #134e4a; --note-8-fg: #ccfbf1;
+
+  --note-amber-bg: #78350f; --note-amber-fg: #fef3c7;
+  --note-rose-bg: #881337; --note-rose-fg: #ffe4e6;
+  --note-sky-bg: #0c4a6e; --note-sky-fg: #e0f2fe;
+  --note-emerald-bg: #064e3b; --note-emerald-fg: #d1fae5;
+  --note-violet-bg: #4c1d95; --note-violet-fg: #ede9fe;
+  --note-slate-bg: #1e293b; --note-slate-fg: #f1f5f9;
+  --note-orange-bg: #7c2d12; --note-orange-fg: #ffedd5;
+  --note-teal-bg: #134e4a; --note-teal-fg: #ccfbf1;
 }
 
 [data-accent="rose"] { --accent: #f43f5e; --accent-2: #ec4899; }
@@ -50,18 +97,7 @@ input, textarea { font-size: 16px; }
 a { color: inherit; text-decoration: none; }
 
 .safe-top { padding-top: env(safe-area-inset-top); }
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-.safe-left { padding-left: env(safe-area-inset-left); }
-.safe-right { padding-right: env(safe-area-inset-right); }
-
-.card-color-amber { --note: #fef3c7; --note-dark: #78350f; }
-.card-color-rose { --note: #ffe4e6; --note-dark: #881337; }
-.card-color-sky { --note: #e0f2fe; --note-dark: #0c4a6e; }
-.card-color-emerald { --note: #d1fae5; --note-dark: #064e3b; }
-.card-color-violet { --note: #ede9fe; --note-dark: #4c1d95; }
-.card-color-slate { --note: #f1f5f9; --note-dark: #1e293b; }
-.card-color-orange { --note: #ffedd5; --note-dark: #7c2d12; }
-.card-color-teal { --note: #ccfbf1; --note-dark: #134e4a; }
+.safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 12px); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
