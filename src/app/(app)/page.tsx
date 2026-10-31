@@ -12,6 +12,7 @@ import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
 import { getGreeting } from "@/lib/greeting";
 import { globalSearch } from "@/lib/search";
+import { PencilSimpleLine, MagnifyingGlass, Notebook } from "@phosphor-icons/react";
 
 export default function Home() {
   const notes = useLiveQuery(() => db.notes.filter((n) => !n.deletedAt && !n.isArchived).toArray(), []);
@@ -68,7 +69,7 @@ export default function Home() {
           <p className="mt-1 text-sm text-[var(--text-muted)]">{new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <Button onClick={quickNote} className="hidden md:flex"><Icon icon={require("@phosphor-icons/react").PencilSimpleLine} size={18} weight="regular" /> Catatan baru</Button>
+          <Button onClick={quickNote} className="hidden md:flex"><Icon icon={PencilSimpleLine} size={18} weight="regular" /> Catatan baru</Button>
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">Z</div>
         </div>
       </div>
@@ -77,7 +78,7 @@ export default function Home() {
         onClick={() => setPaletteOpen(true)}
         className="flex h-12 w-full items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-left text-[var(--text-muted)] transition hover:border-[var(--accent)]"
       >
-        <Icon icon={require("@phosphor-icons/react").MagnifyingGlass} size={20} weight="regular" />
+        <Icon icon={MagnifyingGlass} size={20} weight="regular" />
         <span className="flex-1">Cari catatan, koleksi...</span>
         <kbd className="rounded-lg border border-[var(--border)] bg-[var(--card-muted)] px-2 py-1 text-xs text-[var(--text-muted)]">Ctrl K</kbd>
       </button>
@@ -110,10 +111,10 @@ export default function Home() {
 
       {list.length === 0 && (
         <EmptyState
-          icon={<Icon icon={require("@phosphor-icons/react").Notebook} size={32} weight="duotone" className="text-[var(--accent)]" />}
+          icon={<Icon icon={Notebook} size={32} weight="duotone" className="text-[var(--accent)]" />}
           title="Belum ada catatan"
           description="Tekan tombol Baru untuk mulai menulis."
-          action={<Button onClick={quickNote}><Icon icon={require("@phosphor-icons/react").PencilSimpleLine} size={18} weight="regular" /> Buat catatan</Button>}
+          action={<Button onClick={quickNote}><Icon icon={PencilSimpleLine} size={18} weight="regular" /> Buat catatan</Button>}
         />
       )}
 

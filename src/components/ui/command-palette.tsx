@@ -1,8 +1,8 @@
 "use client";
 import * as React from "react";
 import { Dialog } from "@/components/ui/dialog";
-import { Icon } from "@/components/ui/icon";
-import { Search } from "lucide-react";
+import { Icon } from "@/components/icons";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -25,7 +25,7 @@ export function CommandPalette({ open, onOpenChange, query, onQueryChange, resul
   return (
     <Dialog open={open} onClose={() => onOpenChange(false)} title="Cari">
       <div className="flex items-center gap-3 border-b border-[var(--border)] px-4">
-        <Icon icon={Search} size={20} className="text-[var(--text-muted)]" />
+        <Icon icon={MagnifyingGlass} size={20} className="text-[var(--text-muted)]" />
         <input
           ref={inputRef}
           value={query}

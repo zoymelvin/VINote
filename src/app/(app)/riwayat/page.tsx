@@ -11,11 +11,11 @@ import { groupHistoryDate } from "@/lib/utils";
 import { useToast } from "@/stores/toast";
 import Link from "next/link";
 import type { Note } from "@/lib/notes/types";
-import { MoreHorizontal, Search } from "lucide-react";
+import { Icon } from "@/components/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Icon } from "@/components/ui/icon";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
+import { MagnifyingGlass, List } from "@phosphor-icons/react";
 
 const labels: Record<string, string> = { today: "Hari ini", yesterday: "Kemarin", week: "Minggu ini", older: "Lebih lama" };
 
@@ -49,7 +49,7 @@ export default function RiwayatPage() {
     <div className="p-4 md:p-8">
       <PageHeader title="Riwayat" description="Catatan yang pernah dibuka" />
       <div className="mb-6 relative">
-        <Icon icon={Search} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+        <Icon icon={MagnifyingGlass} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -79,16 +79,16 @@ export default function RiwayatPage() {
                 <div className="text-xs text-[var(--text-muted)]">{new Date((n.lastOpenedAt ?? n.updatedAt)).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]"><Icon icon={MoreHorizontal} size={18} /></button>
+                     <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]"><Icon icon={List} size={18} weight="bold" /></button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setPreview(n)}>Pratinjau</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setPreview(n)}>Pratinjau</DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href={`/catatan/${n.id}`}>Edit</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => duplicateNote(n.id)}>Duplikat</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => duplicateNote(n.id)}>Duplikat</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => remove(n)} className="text-rose-600">Hapus</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => remove(n)} className="text-rose-600">Hapus</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </m.div>

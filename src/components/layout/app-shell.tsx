@@ -6,41 +6,43 @@ import { Icon, IconTile } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { ToastHost } from "@/components/ui/toast";
 import { createNote, listCollections } from "@/lib/db/repo";
-import type { Collection } from "@/lib/notes/types";
+import type { Collection, Note } from "@/lib/notes/types";
 import * as m from "motion/react-m";
 import { useLiveQuery } from "dexie-react-hooks";
+import { House, ClockCounterClockwise, Stack, GearSix, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
+import type { IconWeight } from "@phosphor-icons/react";
 
 const tabs = [
-  { href: "/", label: "Beranda", icon: require("@phosphor-icons/react").House },
-  { href: "/riwayat", label: "Riwayat", icon: require("@phosphor-icons/react").ClockCounterClockwise },
-  { href: "/koleksi", label: "Koleksi", icon: require("@phosphor-icons/react").Stack },
-  { href: "/pengaturan", label: "Pengaturan", icon: require("@phosphor-icons/react").GearSix },
+  { href: "/", label: "Beranda", icon: House },
+  { href: "/riwayat", label: "Riwayat", icon: ClockCounterClockwise },
+  { href: "/koleksi", label: "Koleksi", icon: Stack },
+  { href: "/pengaturan", label: "Pengaturan", icon: GearSix },
 ];
 
-const noteTypes: { type: string; label: string; icon: typeof require("@phosphor-icons/react").NotePencil }[] = [
-  { type: "text", label: "Teks", icon: require("@phosphor-icons/react").NotePencil },
-  { type: "checklist", label: "Checklist", icon: require("@phosphor-icons/react").CheckSquare },
-  { type: "code", label: "Kode", icon: require("@phosphor-icons/react").CodeBlock },
-  { type: "quick", label: "Catatan Cepat", icon: require("@phosphor-icons/react").Lightning },
-  { type: "markdown", label: "Markdown", icon: require("@phosphor-icons/react").MarkdownLogo },
-  { type: "journal", label: "Jurnal", icon: require("@phosphor-icons/react").BookOpenText },
-  { type: "voice", label: "Suara", icon: require("@phosphor-icons/react").Microphone },
-  { type: "drawing", label: "Sketsa", icon: require("@phosphor-icons/react").Scribble },
-  { type: "bookmark", label: "Bookmark", icon: require("@phosphor-icons/react").Bookmark },
-  { type: "template", label: "Template", icon: require("@phosphor-icons/react").Layout },
+const noteTypes: { type: string; label: string; icon: React.ComponentType<{ size?: number; weight?: IconWeight; className?: string; [key: string]: unknown }> }[] = [
+  { type: "text", label: "Teks", icon: NotePencil },
+  { type: "checklist", label: "Checklist", icon: CheckSquare },
+  { type: "code", label: "Kode", icon: CodeBlock },
+  { type: "quick", label: "Catatan Cepat", icon: Lightning },
+  { type: "markdown", label: "Markdown", icon: MarkdownLogo },
+  { type: "journal", label: "Jurnal", icon: BookOpenText },
+  { type: "voice", label: "Suara", icon: Microphone },
+  { type: "drawing", label: "Sketsa", icon: Scribble },
+  { type: "bookmark", label: "Bookmark", icon: Bookmark },
+  { type: "template", label: "Template", icon: Layout },
 ];
 
-const collectionGradients: Record<string, string> = {
-  Folder: "from-gray-400 to-gray-500",
-  Briefcase: "from-blue-400 to-blue-600",
-  House: "from-emerald-400 to-emerald-600",
-  Lightbulb: "from-amber-400 to-amber-600",
-  Palette: "from-pink-400 to-pink-600",
-  Books: "from-indigo-400 to-indigo-600",
-  Target: "from-rose-400 to-rose-600",
-  AirplaneTilt: "from-sky-400 to-sky-600",
-  Barbell: "from-orange-400 to-orange-600",
-  FlowerLotus: "from-teal-400 to-teal-600",
+const GRADIENTS: Record<string, string> = {
+  "\u{1F4C1}": "from-gray-400 to-gray-500",
+  "\u{1F4BC}": "from-blue-400 to-blue-600",
+  "\u{1F3E0}": "from-emerald-400 to-emerald-600",
+  "\u{1F4A1}": "from-amber-400 to-amber-600",
+  "\u{1F3A8}": "from-pink-400 to-pink-600",
+  "\u{1F4DA}": "from-indigo-400 to-indigo-600",
+  "\u{1F3AF}": "from-rose-400 to-rose-600",
+  "\u{2708}\u{FE0F}": "from-sky-400 to-sky-600",
+  "\u{1F4AA}": "from-orange-400 to-orange-600",
+  "\u{1F9D8}": "from-teal-400 to-teal-600",
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -51,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const collections = useLiveQuery(() => listCollections(), []);
 
   async function newNote(type: string) {
-    const n = await createNote({ type: type as any, title: "" });
+    const n = await createNote({ type: type as Note["type"], title: "" });
     setFabOpen(false);
     router.push(`/catatan/${n.id}`);
   }
@@ -75,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             aria-label={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
             className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
-            <Icon icon={collapsed ? require("@phosphor-icons/react").PanelLeftOpen : require("@phosphor-icons/react").PanelLeftClose} size={20} weight="regular" />
+            <Icon icon={collapsed ? Sidebar : SidebarSimple} size={20} weight="regular" />
           </button>
         </div>
         <nav className="flex flex-col gap-1">
@@ -102,22 +104,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="mb-2 flex items-center justify-between px-3">
               <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Koleksi</span>
               <button onClick={() => router.push("/koleksi")} className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Koleksi baru">
-                <Icon icon={require("@phosphor-icons/react").Plus} size={20} weight="regular" />
+                <Icon icon={Plus} size={20} weight="regular" />
               </button>
             </div>
             <div className="flex flex-col gap-0.5">
               {collapsibleCollections.map((c: Collection) => {
                 const active = path === `/koleksi/${c.id}`;
-                const iconKey = c.icon?.replace(/[^\p{Extended_Pictographic}]/gu, "").trim() || "📁";
-                const phosphorName = iconKey === "📁" ? "Folder" : iconKey === "💼" ? "Briefcase" : iconKey === "🏠" ? "House" : iconKey === "💡" ? "Lightbulb" : iconKey === "🎨" ? "Palette" : iconKey === "📚" ? "Books" : iconKey === "🎯" ? "Target" : iconKey === "✈️" ? "AirplaneTilt" : iconKey === "💪" ? "Barbell" : iconKey === "🧘" ? "FlowerLotus" : "Folder";
-                const IconComp = require("@phosphor-icons/react")[phosphorName] || require("@phosphor-icons/react").Folder;
+                const iconKey = c.icon?.replace(/[^\p{Extended_Pictographic}]/gu, "").trim() || "\u{1F4C1}";
+                const IconComp = iconKey === "\u{1F4C1}" ? Folder : iconKey === "\u{1F4BC}" ? Briefcase : iconKey === "\u{1F3E0}" ? Lightbulb : iconKey === "\u{1F4A1}" ? Lightbulb : iconKey === "\u{1F3A8}" ? Palette : iconKey === "\u{1F4DA}" ? Books : iconKey === "\u{1F3AF}" ? Target : iconKey === "\u{2708}\u{FE0F}" ? AirplaneTilt : iconKey === "\u{1F4AA}" ? Barbell : iconKey === "\u{1F9D8}" ? FlowerLotus : Folder;
+                const gradient = GRADIENTS[iconKey] || "from-gray-400 to-gray-500";
                 return (
                   <Link
                     key={c.id}
                     href={`/koleksi/${c.id}`}
                     className={cn("flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm transition", active ? "bg-[var(--card-muted)] font-medium" : "text-[var(--text-muted)] hover:bg-[var(--card-muted)]/60")}
                   >
-                    <IconTile icon={IconComp} gradient={collectionGradients[phosphorName] || "from-gray-400 to-gray-500"} />
+                    <IconTile icon={IconComp} gradient={gradient} />
                     <span className="truncate">{c.name}</span>
                   </Link>
                 );
@@ -166,7 +168,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="flex h-14 w-14 -translate-y-3 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[var(--shadow-2)] transition-transform active:scale-95"
               style={{ transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)" }}
             >
-              <Icon icon={require("@phosphor-icons/react").Plus} size={24} weight="regular" />
+              <Icon icon={Plus} size={24} weight="regular" />
             </button>
             {fabOpen && (
               <div className="absolute bottom-16 left-1/2 z-50 w-52 -translate-x-1/2 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-[var(--shadow-2)] backdrop-blur">

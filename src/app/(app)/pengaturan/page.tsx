@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Palette, Monitor, Download, HelpCircle, LogOut, Trash2, User } from "lucide-react";
-import { Icon } from "@/components/ui/icon";
+import { Palette, Monitor, Download, Question, SignOut, Trash, User } from "@phosphor-icons/react";
+import { Icon } from "@/components/icons";
 import { ACCENT_LABEL, THEME_LABEL } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +85,7 @@ export default function PengaturanPage() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-muted)]">Bantuan</h2>
-        <SettingsRow icon={<Icon icon={HelpCircle} size={20} />} label="Pintasan keyboard" description="Lihat daftar pintasan">
+        <SettingsRow icon={<Icon icon={Question} size={20} />} label="Pintasan keyboard" description="Lihat daftar pintasan">
           <Button size="sm" variant="ghost">Lihat</Button>
         </SettingsRow>
       </section>
@@ -93,8 +93,8 @@ export default function PengaturanPage() {
       <section className="rounded-[24px] border border-rose-200 bg-rose-50 p-4 dark:border-rose-900 dark:bg-rose-950/30">
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-rose-700 dark:text-rose-300">Zona Berbahaya</h2>
-          <Button variant="danger" className="w-full" onClick={signOut}><Icon icon={LogOut} size={18} /> Keluar</Button>
-          <Button variant="danger" className="w-full" onClick={() => {}}><Icon icon={Trash2} size={18} /> Hapus semua data lokal</Button>
+          <Button variant="danger" className="w-full" onClick={signOut}><Icon icon={SignOut} size={18} /> Keluar</Button>
+          <Button variant="danger" className="w-full" onClick={() => {}}><Icon icon={Trash} size={18} /> Hapus semua data lokal</Button>
         </div>
       </section>
 

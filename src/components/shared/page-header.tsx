@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Icon } from "@/components/icons";
+import { ArrowLeft } from "@phosphor-icons/react";
 
 interface PageHeaderProps {
   title: string;
@@ -16,7 +17,7 @@ export function PageHeader({ title, description, actions, back, onBack, icon }: 
       <div className="flex items-center gap-3">
         {back && (
           <button onClick={onBack} className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
-            <Icon icon={require("@phosphor-icons/react").ArrowLeft} size={20} weight="regular" />
+            <Icon icon={ArrowLeft} size={20} weight="regular" />
           </button>
         )}
         {icon && <div className="flex h-10 w-10 items-center justify-center rounded-xl">{icon}</div>}

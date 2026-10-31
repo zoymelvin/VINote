@@ -23,9 +23,9 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Icon } from "@/components/ui/icon";
+import { Icon } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Pin, History, Maximize, Minimize, MoreHorizontal, ChevronDown, Heading1, Heading2, Heading3, Bold, Italic, Underline, Strikethrough, Code, List, ListOrdered, CheckSquare, Quote, SquareCode, AlignLeft, AlignCenter, AlignRight, AlignJustify, Type, Highlighter } from "lucide-react";
+import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter } from "@phosphor-icons/react";
 import type { Collection, Tag } from "@/lib/notes/types";
 
 const lowlight = createLowlight(common);
@@ -146,7 +146,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     return (
       <div className="fixed inset-0 z-50 bg-[var(--background)]">
         <div className="flex items-center justify-between p-4">
-          <Button variant="ghost" onClick={() => setFocusMode(false)}><Icon icon={Minimize} size={18} /> Keluar Mode Fokus</Button>
+          <Button variant="ghost" onClick={() => setFocusMode(false)}><Icon icon={ArrowsInSimple} size={18} /> Keluar Mode Fokus</Button>
           <span className="text-xs text-[var(--text-muted)]">Esc untuk keluar</span>
         </div>
         <div className="mx-auto max-w-2xl px-4 pb-20">
@@ -168,16 +168,16 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
         <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
           <span className="text-sm text-[var(--text-muted)]">{collectionName || "Koleksi"}</span>
-          <ChevronDown size={14} className="text-[var(--text-muted)]" />
+          <CaretDown size={14} className="text-[var(--text-muted)]" />
         </div>
         <div className="flex items-center gap-1">
           <span className="text-xs text-[var(--text-muted)]">{saving ? "Menyimpan..." : "Tersimpan"}</span>
-          <Button variant="ghost" size="sm" onClick={onPin}><Icon icon={Pin} size={16} /></Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push(`/catatan/${noteId}/versions`)}><Icon icon={History} size={16} /></Button>
-          <Button variant="ghost" size="sm" onClick={() => setFocusMode(true)}><Icon icon={Maximize} size={16} /></Button>
+          <Button variant="ghost" size="sm" onClick={onPin}><Icon icon={PushPin} size={16} /></Button>
+          <Button variant="ghost" size="sm" onClick={() => router.push(`/catatan/${noteId}/versions`)}><Icon icon={ClockCounterClockwise} size={16} /></Button>
+          <Button variant="ghost" size="sm" onClick={() => setFocusMode(true)}><Icon icon={ArrowsOutSimple} size={16} /></Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm"><Icon icon={MoreHorizontal} size={16} /></Button>
+              <Button variant="ghost" size="sm"><Icon icon={List} size={16} /></Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => {}}>Bagikan</DropdownMenuItem>
@@ -205,7 +205,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
         <div className="mb-4 flex flex-wrap gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1 rounded-xl bg-[var(--card-muted)] px-3 py-1.5 text-xs">{collectionName || "Koleksi"} <ChevronDown size={12} /></button>
+               <button className="flex items-center gap-1 rounded-xl bg-[var(--card-muted)] px-3 py-1.5 text-xs">{collectionName || "Koleksi"} <CaretDown size={12} /></button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               {(collections ?? []).map((c: Collection) => (
@@ -220,38 +220,38 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
 
         <div className="mb-2 flex flex-wrap items-center gap-1 rounded-2xl bg-[var(--card)] p-1.5 shadow-[var(--shadow-1)]">
           <ToolbarGroup>
-            <ToolbarBtn onClick={() => setHeading(1)} active={editor?.isActive("heading", { level: 1 })}><Icon icon={Heading1} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={() => setHeading(2)} active={editor?.isActive("heading", { level: 2 })}><Icon icon={Heading2} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={() => setHeading(3)} active={editor?.isActive("heading", { level: 3 })}><Icon icon={Heading3} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setHeading(1)} active={editor?.isActive("heading", { level: 1 })}><Icon icon={TextHOne} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setHeading(2)} active={editor?.isActive("heading", { level: 2 })}><Icon icon={TextHTwo} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setHeading(3)} active={editor?.isActive("heading", { level: 3 })}><Icon icon={TextHThree} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
-            <ToolbarBtn onClick={toggleBold} active={editor?.isActive("bold")}><Icon icon={Bold} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={toggleItalic} active={editor?.isActive("italic")}><Icon icon={Italic} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={toggleUnderline} active={editor?.isActive("underline")}><Icon icon={Underline} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={toggleStrike} active={editor?.isActive("strike")}><Icon icon={Strikethrough} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={toggleCode} active={editor?.isActive("code")}><Icon icon={Code} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleBold} active={editor?.isActive("bold")}><Icon icon={TextB} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleItalic} active={editor?.isActive("italic")}><Icon icon={TextItalic} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleUnderline} active={editor?.isActive("underline")}><Icon icon={TextUnderline} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleStrike} active={editor?.isActive("strike")}><Icon icon={TextStrikethrough} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleCode} active={editor?.isActive("code")}><Icon icon={CodeBlock} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
-            <ToolbarBtn onClick={toggleBulletList} active={editor?.isActive("bulletList")}><Icon icon={List} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={toggleOrderedList} active={editor?.isActive("orderedList")}><Icon icon={ListOrdered} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleBulletList} active={editor?.isActive("bulletList")}><Icon icon={ListBullets} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleOrderedList} active={editor?.isActive("orderedList")}><Icon icon={ListNumbers} size={18} /></ToolbarBtn>
             <ToolbarBtn onClick={toggleTaskList} active={editor?.isActive("taskList")}><Icon icon={CheckSquare} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={toggleBlockquote} active={editor?.isActive("blockquote")}><Icon icon={Quote} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={toggleCodeBlock} active={editor?.isActive("codeBlock")}><Icon icon={SquareCode} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleBlockquote} active={editor?.isActive("blockquote")}><Icon icon={Quotes} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleCodeBlock} active={editor?.isActive("codeBlock")}><Icon icon={BracketsSquare} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
             <ToolbarBtn onClick={() => setAlign("left")} active={editor?.isActive({ textAlign: "left" })}><Icon icon={AlignLeft} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={() => setAlign("center")} active={editor?.isActive({ textAlign: "center" })}><Icon icon={AlignCenter} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setAlign("center")} active={editor?.isActive({ textAlign: "center" })}><Icon icon={TextAlignCenter} size={18} /></ToolbarBtn>
             <ToolbarBtn onClick={() => setAlign("right")} active={editor?.isActive({ textAlign: "right" })}><Icon icon={AlignRight} size={18} /></ToolbarBtn>
-            <ToolbarBtn onClick={() => setAlign("justify")} active={editor?.isActive({ textAlign: "justify" })}><Icon icon={AlignJustify} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setAlign("justify")} active={editor?.isActive({ textAlign: "justify" })}><Icon icon={TextAlignJustify} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Font"><Icon icon={Type} size={18} /></button>
+                 <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Font"><Icon icon={TextAa} size={18} /></button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {FONTS.map((f) => (

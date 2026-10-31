@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 import type { Note } from "@/lib/notes/types";
 import { useState, useRef } from "react";
 import * as m from "motion/react-m";
-import { useReducedMotion } from "motion/react";
 import { NoteTypeIcon } from "@/components/shared/note-type-icon";
+import { DotsThree, PushPin, Bell } from "@phosphor-icons/react";
 
 export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
   const toast = useToast();
@@ -79,19 +79,19 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
                 <h3 className={cn("font-semibold", compact ? "text-sm" : "text-base")}>{note.title || "Tanpa judul"}</h3>
               </div>
               <div className="flex items-center gap-1">
-                {note.isPinned && <Icon icon={require("@phosphor-icons/react").PushPin} size={14} weight="fill" className="text-[var(--accent)]" />}
-                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className={cn(
-                        "flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl",
-                        "opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
-                      )}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Icon icon={require("@phosphor-icons/react").DotsThree} size={18} weight="bold" />
-                    </button>
-                  </DropdownMenuTrigger>
+                 {note.isPinned && <Icon icon={PushPin} size={14} weight="fill" className="text-[var(--accent)]" />}
+                 <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                   <DropdownMenuTrigger asChild>
+                     <button
+                       className={cn(
+                         "flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl",
+                         "opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
+                       )}
+                       onClick={(e) => e.stopPropagation()}
+                     >
+                       <Icon icon={DotsThree} size={18} weight="bold" />
+                     </button>
+                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" onCloseAutoFocus={() => {}}>
                     <DropdownMenuItem onSelect={onPin}>{note.isPinned ? "Lepas sematan" : "Sematkan"}</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => {}}>Tambahkan ke Koleksi...</DropdownMenuItem>
@@ -106,7 +106,7 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
             <p className={cn("line-clamp-4 text-[var(--text-muted)]", compact ? "text-xs" : "text-sm")}>{note.contentText || ""}</p>
             {note.reminderAt && (
               <div className="mt-2 flex items-center gap-1 text-xs text-[var(--text-muted)]">
-                <Icon icon={require("@phosphor-icons/react").Bell} size={12} weight="regular" />
+                <Icon icon={Bell} size={12} weight="regular" />
                 <span>{new Date(note.reminderAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
               </div>
             )}

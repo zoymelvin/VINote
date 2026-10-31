@@ -12,6 +12,7 @@ import type { Note } from "@/lib/notes/types";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
 import { NoteTypeIcon } from "@/components/shared/note-type-icon";
+import { DotsThree } from "@phosphor-icons/react";
 
 export function NoteRow({ note, onPreview, compact }: { note: Note; onPreview?: () => void; compact?: boolean }) {
   const toast = useToast();
@@ -60,7 +61,7 @@ export function NoteRow({ note, onPreview, compact }: { note: Note; onPreview?: 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)]">
-            <Icon icon={require("@phosphor-icons/react").DotsThree} size={18} weight="bold" />
+            <Icon icon={DotsThree} size={18} weight="bold" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

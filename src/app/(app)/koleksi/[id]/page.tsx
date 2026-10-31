@@ -3,9 +3,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getCollection, updateCollection, softDeleteCollection, getNotesOfCollection, createNote } from "@/lib/db/repo";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { NoteCard } from "@/components/notes/note-card";
+import { Icon } from "@/components/icons";
+import { NoteCard } from "@/components/shared/note-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -43,7 +44,7 @@ export default function KoleksiDetailPage() {
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={() => router.back()}><ArrowLeft size={18} /></Button>
+         <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
         {editing ? (
           <Input value={name} onChange={(e) => setName(e.target.value)} onBlur={saveName} onKeyDown={(e) => e.key === "Enter" && saveName()} autoFocus />
         ) : (

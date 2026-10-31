@@ -19,7 +19,6 @@ const eslintConfig = defineConfig([
       "no-restricted-imports": ["error", {
         "paths": [
           { "name": "lucide-react", "message": "Gunakan @/components/icons/index.ts sebagai wrapper ikon." },
-          { "name": "@phosphor-icons/react", "message": "Gunakan @/components/icons/index.ts sebagai wrapper ikon." },
         ]
       }]
     }

@@ -3,7 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { listCollections, createCollection } from "@/lib/db/repo";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Plus, FolderKanban } from "lucide-react";
+import { Plus, Kanban } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -41,7 +41,7 @@ export default function KoleksiPage() {
       <PageHeader title="Koleksi" description="Kelompokkan catatan Anda" actions={<Button onClick={() => setOpen(true)}><Plus size={18} /> Koleksi baru</Button>} />
       {noCollection.length === 0 ? (
         <EmptyState
-          icon={<FolderKanban size={32} className="text-[var(--accent)]" />}
+           icon={<Kanban size={32} className="text-[var(--accent)]" />}
           title="Belum ada koleksi"
           description="Buat koleksi pertama untuk mengorganisir catatan."
           action={<Button onClick={() => setOpen(true)}><Plus size={18} /> Buat koleksi</Button>}

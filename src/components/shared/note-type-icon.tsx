@@ -1,17 +1,19 @@
 import * as React from "react";
 import { Icon } from "@/components/icons";
+import { IconWeight } from "@phosphor-icons/react";
+import { NotePencil, CheckSquare, MarkdownLogo, CodeBlock, Lightning, BookOpenText, Microphone, Scribble, Bookmark, Layout } from "@phosphor-icons/react";
 
-const NOTE_TYPE_ICON: Record<string, typeof require("@phosphor-icons/react").NotePencil> = {
-  text: require("@phosphor-icons/react").NotePencil,
-  checklist: require("@phosphor-icons/react").CheckSquare,
-  markdown: require("@phosphor-icons/react").MarkdownLogo,
-  code: require("@phosphor-icons/react").CodeBlock,
-  quick: require("@phosphor-icons/react").Lightning,
-  journal: require("@phosphor-icons/react").BookOpenText,
-  voice: require("@phosphor-icons/react").Microphone,
-  drawing: require("@phosphor-icons/react").Scribble,
-  bookmark: require("@phosphor-icons/react").Bookmark,
-  template: require("@phosphor-icons/react").Layout,
+const NOTE_TYPE_ICON: Record<string, React.ComponentType<{ size?: number; weight?: IconWeight; className?: string; [key: string]: unknown }>> = {
+  text: NotePencil,
+  checklist: CheckSquare,
+  markdown: MarkdownLogo,
+  code: CodeBlock,
+  quick: Lightning,
+  journal: BookOpenText,
+  voice: Microphone,
+  drawing: Scribble,
+  bookmark: Bookmark,
+  template: Layout,
 };
 
 const NOTE_TYPE_COLOR: Record<string, string> = {

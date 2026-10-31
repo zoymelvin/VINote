@@ -5,7 +5,7 @@ interface FieldProps {
   label: string;
   error?: string;
   help?: string;
-  children: React.ReactNode;
+  children: React.ReactElement<Record<string, unknown>>;
 }
 
 export function Field({ label, error, help, children }: FieldProps) {
@@ -13,7 +13,7 @@ export function Field({ label, error, help, children }: FieldProps) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">{label}</label>
-      {React.cloneElement(children as React.ReactElement<any>, { id })}
+      {React.cloneElement(children, { id })}
       {(error || help) && <p className="text-xs text-[var(--text-muted)]">{error || help}</p>}
     </div>
   );

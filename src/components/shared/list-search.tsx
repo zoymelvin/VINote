@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { Icon } from "@/components/icons";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 
 interface ListSearchProps {
   value: string;
@@ -11,7 +12,7 @@ interface ListSearchProps {
 export function ListSearch({ value, onChange, placeholder }: ListSearchProps) {
   return (
     <div className="relative mb-4">
-      <Icon icon={require("@phosphor-icons/react").MagnifyingGlass} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+      <Icon icon={MagnifyingGlass} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}

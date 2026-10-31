@@ -4,23 +4,23 @@ import Link from "next/link";
 import { db } from "@/lib/db/db";
 import { softDeleteNote, togglePinNote, toggleFavoriteNote, duplicateNote, archiveNote, unarchiveNote } from "@/lib/db/repo";
 import { useToast } from "@/stores/toast";
-import { Pin, MoreHorizontal, Clock, FileText, CheckSquare, SquareCode, Zap, BookOpen, Mic, Paintbrush, Bookmark, Copy } from "lucide-react";
-import { Icon } from "@/components/ui/icon";
+import { Icon } from "@/components/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 import type { Note } from "@/lib/notes/types";
 import { useState, useRef } from "react";
+import { PushPin, List, Clock, FileText, CheckSquare, BracketsSquare, Lightning, BookOpen, Microphone, PaintBrush, Bookmark, Copy } from "@phosphor-icons/react";
 
 const TYPE_ICON: Record<string, typeof FileText> = {
   text: FileText,
   checklist: CheckSquare,
   markdown: FileText,
-  code: SquareCode,
-  quick: Zap,
+  code: BracketsSquare,
+  quick: Lightning,
   journal: BookOpen,
-  voice: Mic,
-  drawing: Paintbrush,
+  voice: Microphone,
+  drawing: PaintBrush,
   bookmark: Bookmark,
   template: Copy,
 };
@@ -67,8 +67,8 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
     }
   }
 
-  const color = note.color;
   const TypeIcon = TYPE_ICON[note.type] || FileText;
+  const color = note.color;
   return (
     <ContextMenu>
       <ContextMenuTrigger>
@@ -93,11 +93,11 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
                 <h3 className={cn("font-semibold", compact ? "text-sm" : "text-base")}>{note.title || "Tanpa judul"}</h3>
               </div>
               <div className="flex items-center gap-1">
-                {note.isPinned && <Icon icon={Pin} size={14} />}
+                 {note.isPinned && <Icon icon={PushPin} size={14} />}
                 <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <button className={cn("flex h-8 w-8 items-center justify-center rounded-xl opacity-0 transition-opacity", "group-hover:opacity-100 focus:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100")} onClick={(e) => e.preventDefault()}>
-                      <Icon icon={MoreHorizontal} size={18} />
+                      <Icon icon={List} size={18} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -122,7 +122,7 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
             <p className={cn("line-clamp-4 opacity-90", compact ? "text-xs" : "text-sm")}>{note.contentText || ""}</p>
             {note.reminderAt && (
               <div className="mt-2 flex items-center gap-1 text-xs opacity-70">
-                <Icon icon={Clock} size={12} />
+                 <Icon icon={Clock} size={12} />
                 <span>{new Date(note.reminderAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
               </div>
             )}
