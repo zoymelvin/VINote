@@ -40,6 +40,7 @@ export interface Note {
   updatedAt: number;
   deletedAt: number | null;
   lastOpenedAt: number | null;
+  historyHiddenAt: number | null;
   version: number;
 }
 

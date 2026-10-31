@@ -25,6 +25,7 @@ export async function createNote(input: Partial<Note> = {}): Promise<Note> {
     updatedAt: input.updatedAt ?? t,
     deletedAt: null,
     lastOpenedAt: input.lastOpenedAt ?? t,
+    historyHiddenAt: null,
     version: input.version ?? 1,
   };
   await db.notes.put(note);
@@ -146,7 +147,7 @@ export async function listNotes(filter?: { includeDeleted?: boolean; archived?: 
 }
 
 export async function listHistory() {
-  const all = await db.notes.filter((n) => !n.deletedAt).toArray();
+  const all = await db.notes.filter((n) => !n.deletedAt && (n.historyHiddenAt == null || (n.lastOpenedAt ?? n.updatedAt) > (n.historyHiddenAt ?? 0))).toArray();
   return all.sort((a, b) => (b.lastOpenedAt ?? b.updatedAt) - (a.lastOpenedAt ?? a.updatedAt));
 }
 

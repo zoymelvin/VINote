@@ -21,6 +21,7 @@ function note(overrides: Partial<Note>): Note {
     updatedAt: 1,
     deletedAt: null,
     lastOpenedAt: null,
+    historyHiddenAt: null,
     version: 1,
     ...overrides,
   };

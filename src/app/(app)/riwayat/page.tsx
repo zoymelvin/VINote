@@ -4,7 +4,6 @@ import { listHistory, softDeleteNote, duplicateNote } from "@/lib/db/repo";
 import { db } from "@/lib/db/db";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { Sheet } from "@/components/ui/sheet";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { groupHistoryDate } from "@/lib/utils";
@@ -13,16 +12,16 @@ import Link from "next/link";
 import type { Note } from "@/lib/notes/types";
 import { Icon } from "@/components/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { NoteTypeIcon } from "@/components/shared/note-type-icon";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
-import { MagnifyingGlass, List } from "@phosphor-icons/react";
+import { MagnifyingGlass, DotsThree, Eraser, EyeSlash, Copy, Archive, Trash } from "@phosphor-icons/react";
 
 const labels: Record<string, string> = { today: "Hari ini", yesterday: "Kemarin", week: "Minggu ini", older: "Lebih lama" };
 
 export default function RiwayatPage() {
   const history = useLiveQuery(() => listHistory(), []);
   const toast = useToast();
-  const [preview, setPreview] = useState<Note | null>(null);
   const [query, setQuery] = useState("");
   const reduced = useReducedMotion();
 
@@ -43,6 +42,11 @@ export default function RiwayatPage() {
   async function remove(n: { id: string }) {
     await softDeleteNote(n.id);
     toast.push({ message: "Dipindahkan ke Sampah", undo: async () => db.notes.update(n.id, { deletedAt: null }) });
+  }
+
+  async function hideFromHistory(n: { id: string }) {
+    await db.notes.update(n.id, { historyHiddenAt: Date.now() });
+    toast.push({ message: "Dihapus dari riwayat", undo: async () => db.notes.update(n.id, { historyHiddenAt: null }) });
   }
 
   return (
@@ -70,25 +74,23 @@ export default function RiwayatPage() {
                 className={cn("flex items-center gap-3 px-4 py-3", idx > 0 && "border-t border-[var(--border)]")}
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--card-muted)] text-lg">
-                  {n.type === "checklist" ? "✅" : n.type === "code" ? "💻" : "📝"}
+                  <NoteTypeIcon type={n.type} size={20} />
                 </div>
-                <button className="flex-1 text-left" onClick={() => setPreview(n)}>
+                <Link href={`/catatan/${n.id}`} className="flex-1 text-left">
                   <div className="font-semibold">{n.title || "Tanpa judul"}</div>
                   <div className="mt-0.5 line-clamp-1 text-xs text-[var(--text-muted)]">{n.contentText?.slice(0, 80)}</div>
-                </button>
+                </Link>
                 <div className="text-xs text-[var(--text-muted)]">{new Date((n.lastOpenedAt ?? n.updatedAt)).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                     <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]"><Icon icon={List} size={18} weight="bold" /></button>
+                    <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]"><Icon icon={DotsThree} size={18} weight="bold" /></button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={() => setPreview(n)}>Pratinjau</DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/catatan/${n.id}`}>Edit</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => duplicateNote(n.id)}>Duplikat</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={Copy} size={18} />} onSelect={() => duplicateNote(n.id)}>Duplikat</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={Archive} size={18} />} onSelect={() => {}}>Arsipkan</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => remove(n)} className="text-rose-600">Hapus</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={EyeSlash} size={18} />} onSelect={() => hideFromHistory(n)}>Hapus dari riwayat</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={Trash} size={18} />} onSelect={() => remove(n)} className="text-rose-600">Hapus</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </m.div>
@@ -98,9 +100,6 @@ export default function RiwayatPage() {
       ) : null)}
       {!history?.length && <EmptyState title="Belum ada riwayat" description="Catatan yang dibuka akan muncul di sini." />}
       {history?.length && !filtered.length && <EmptyState title="Tidak ada hasil" description={`Tidak ada catatan yang cocok dengan "${query}".`} />}
-      <Sheet open={!!preview} onClose={() => setPreview(null)} title={preview?.title}>
-        <div className="text-sm whitespace-pre-wrap">{preview?.contentText}</div>
-      </Sheet>
     </div>
   );
 }

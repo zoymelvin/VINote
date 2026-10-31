@@ -27,6 +27,7 @@ function toLocal(row: Record<string, unknown>): Note {
     updatedAt: new Date(String(row.updated_at)).getTime(),
     deletedAt: row.deleted_at ? new Date(String(row.deleted_at)).getTime() : null,
     lastOpenedAt: row.last_opened_at ? new Date(String(row.last_opened_at)).getTime() : null,
+    historyHiddenAt: row.history_hidden_at ? new Date(String(row.history_hidden_at)).getTime() : null,
     version: Number(row.version ?? 1),
   };
 }
