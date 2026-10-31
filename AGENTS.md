@@ -1,42 +1,51 @@
 <!-- BEGIN:nextjs-agent-rules -->
-
 ## This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
+Breaking changes — APIs, conventions, and file structure may differ from training data. Read `node_modules/next/dist/docs/` before writing code. This block is re-added by `next dev`; do not remove it from diffs.
 <!-- END:nextjs-agent-rules -->
 
 ## Commands
-
 - Install: `npm ci`
-- Dev: `npm run dev`
-- Build: `npm run build` (uses webpack; required for Serwist service worker — do not drop `--webpack`)
+- Dev: `npm run dev` (turbopack; Serwist PWA disabled in dev)
+- Build: `npm run build` — **must use webpack** for Serwist service worker; do not drop `--webpack`
 - Lint: `npm run lint`
 - Typecheck: `npx tsc --noEmit`
 - Test all: `npm run test`
 - Single test file: `npm run test -- src/lib/db/repo.test.ts`
 - Single test by name: `npm run test -- -t "creates and updates note"`
-- Watch tests: `npm run test:watch`
+- UI check: `node scripts/ui-check.mjs`
+- Search check: `node scripts/search-check.mjs`
 
 ## Architecture
+- Next.js 16 App Router, single app under `src/`; alias `@/*` → `src/*`.
+- Route groups: `src/app/(app)/` — parenthesized segments are layout groups, not routes.
+- Offline-first: Dexie DB (`src/lib/db/db.ts`), repos (`src/lib/db/repo.ts`), sync engine (`src/lib/sync/engine.ts`) reconciles with Supabase.
+- Supabase optional: `src/lib/supabase/client.ts` and `server.ts` return `null` without env; app runs local-only.
+- PWA via Serwist: source `src/sw.ts`, output `public/sw.js` (generated — do not edit). Disabled in dev via `next.config.ts`.
+- Tailwind v4: `@tailwindcss/turbopack` for dev, webpack for build.
 
-- Single Next.js 16 App Router app; source under `src/`; alias `@/*` -> `src/*`.
-- Route groups use `(app)` convention under `src/app/(app)` — the parenthesized segment is a layout group, not a route.
-- Offline-first: Dexie DB in `src/lib/db`, repositories in `src/lib/db/repo.ts`; sync engine in `src/lib/sync/engine.ts` reconciles with Supabase.
-- Supabase is optional: `src/lib/supabase/client.ts` and `server.ts` return `null` without env; middleware no-ops. App runs local-only.
-- PWA via Serwist: source `src/sw.ts`, output `public/sw.js`; disabled in dev (`disable` flag in `next.config.ts`). `public/sw.js` is generated — do not edit.
-- Tailwind v4 with `@tailwindcss/turbopack` loader for dev (turbopack); build uses webpack via Serwist.
+## Design System (Midnight Ink)
+- OKLCH CSS tokens in `src/app/globals.css` (`--background`, `--surface`, `--accent`, `--radius: 16px`, `--radius-sm: 12px`).
+- Font: Inter via `next/font/google`; `--font-sans` variable.
+- No warm tints (hue 20–95) in dark mode surfaces.
+- Note card colors: `polos/mawar/pink/violet/indigo/langit/teal/zamrud/lime` (not legacy `neutral/stone/orange/yellow/green/blue/purple/lavender`). Use `normalizeCardColor()` when reading old data.
 
-## Setup
+## Icon Convention
+- **All icons MUST use the wrapper at `@/components/icons/index.tsx`** (`Icon` and `IconTile` components).
+- ESLint blocks direct `lucide-react` imports (`no-restricted-imports`). Use Phosphor icons instead.
+- `@phosphor-icons/react` is the icon library; direct imports are allowed but prefer the wrapper.
 
-- `cp .env.example .env.local`; Supabase and VAPID optional.
-- Supabase setup: run all files in `supabase/migrations/` in SQL Editor, enable Realtime on `notes`, `folders`, `tags`, `note_tags`, create private `attachments` bucket.
-- `.env` vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`.
+## Data Model Quirks
+- `folderId` on `notes` is deprecated but kept for rollback; multi-collection uses `noteCollections` table (many-to-many).
+- Dexie v3 schema in `db.ts`; upgrades run automatically on version bump.
+- Empty notes: `/catatan/baru` generates UUID and redirects without DB write; editor lazy-saves on first content via `createNote({ id: noteId, ... })`.
+- `/catatan/[id]` supports `isNew` draft mode when note does not yet exist in DB.
 
 ## Testing
-
 - Vitest + jsdom + fake-indexeddb; setup `src/test/setup.ts`. No external services needed.
-- RLS test reads migration SQL from `supabase/migrations/`; run commands from repo root.
-- Do not edit `next-env.d.ts` (generated).
+- Run from repo root so relative paths in tests resolve.
+- `next-env.d.ts` and `public/sw.js` are generated — do not edit.
+
+## Setup
+- `cp .env.example .env.local`; Supabase and VAPID optional.
+- Supabase: run `supabase/migrations/*.sql` in SQL Editor, enable Realtime on `notes`, `folders`, `tags`, `note_tags`, create private `attachments` bucket.
+- Env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`.
