@@ -12,7 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Install: `npm ci`
 - Dev: `npm run dev`
-- Build: `npm run build` (webpack; required for Serwist service worker — do not drop `--webpack`)
+- Build: `npm run build` (uses webpack; required for Serwist service worker — do not drop `--webpack`)
 - Lint: `npm run lint`
 - Typecheck: `npx tsc --noEmit`
 - Test all: `npm run test`
@@ -22,19 +22,21 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Architecture
 
-- Next.js 16 App Router; source under `src/`; alias `@/*` -> `src/*`.
+- Single Next.js 16 App Router app; source under `src/`; alias `@/*` -> `src/*`.
+- Route groups use `(app)` convention under `src/app/(app)` — the parenthesized segment is a layout group, not a route.
 - Offline-first: Dexie DB in `src/lib/db`, repositories in `src/lib/db/repo.ts`; sync engine in `src/lib/sync/engine.ts` reconciles with Supabase.
 - Supabase is optional: `src/lib/supabase/client.ts` and `server.ts` return `null` without env; middleware no-ops. App runs local-only.
-- PWA via Serwist: source `src/sw.ts`, output `public/sw.js`; disabled in dev.
-- Tailwind v4.
+- PWA via Serwist: source `src/sw.ts`, output `public/sw.js`; disabled in dev (`disable` flag in `next.config.ts`). `public/sw.js` is generated — do not edit.
+- Tailwind v4 with `@tailwindcss/turbopack` loader for dev (turbopack); build uses webpack via Serwist.
 
 ## Setup
 
 - `cp .env.example .env.local`; Supabase and VAPID optional.
-- Supabase: run `supabase/migrations/0001_init.sql` in SQL Editor, enable Realtime on `notes`, `folders`, `tags`, `note_tags`, create private `attachments` bucket.
+- Supabase setup: run all files in `supabase/migrations/` in SQL Editor, enable Realtime on `notes`, `folders`, `tags`, `note_tags`, create private `attachments` bucket.
+- `.env` vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`.
 
 ## Testing
 
 - Vitest + jsdom + fake-indexeddb; setup `src/test/setup.ts`. No external services needed.
-- RLS test reads migration SQL from repo root; run commands from repo root.
+- RLS test reads migration SQL from `supabase/migrations/`; run commands from repo root.
 - Do not edit `next-env.d.ts` (generated).
