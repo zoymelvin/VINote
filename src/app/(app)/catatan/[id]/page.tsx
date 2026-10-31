@@ -31,6 +31,8 @@ export default function NotePage() {
           initialContent={note.content}
           collectionName={collection?.name}
           tags={tags}
+          isArchived={note.isArchived}
+          isDeleted={!!note.deletedAt}
         />
       </div>
     );
@@ -51,5 +53,15 @@ export default function NotePage() {
     );
   }
 
-  return <div className="p-4">Memuat...</div>;
+  if (note === null || note === undefined) {
+    // Wait for query to resolve
+    return <div className="p-4">Memuat...</div>;
+  }
+
+  return (
+    <div className="p-4 flex flex-col items-center justify-center min-h-[50vh] gap-4">
+      <p className="text-[var(--text-muted)]">Catatan tidak ditemukan</p>
+      <button onClick={() => window.history.back()} className="text-[var(--accent)] underline">Kembali</button>
+    </div>
+  );
 }

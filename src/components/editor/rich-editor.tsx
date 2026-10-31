@@ -17,7 +17,7 @@ import FontFamily from "@tiptap/extension-font-family";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { updateNote, togglePinNote, listCollections, moveNoteToCollection, createNote } from "@/lib/db/repo";
+import { updateNote, togglePinNote, listCollections, moveNoteToCollection, createNote, unarchiveNote, restoreNote } from "@/lib/db/repo";
 import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter } from "@phosphor-icons/react";
+import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter, Archive, Trash } from "@phosphor-icons/react";
 import type { Collection, Tag } from "@/lib/notes/types";
 
 const lowlight = createLowlight(common);
@@ -36,7 +36,7 @@ const FONTS = [
   { id: "mono", label: "Mono", css: "ui-monospace, monospace" },
 ];
 
-export default function RichEditor({ noteId, initialTitle, initialContent, collectionName, tags, isNew }: { noteId: string; initialTitle: string; initialContent: unknown; collectionName?: string; tags?: Tag[]; isNew?: boolean }) {
+export default function RichEditor({ noteId, initialTitle, initialContent, collectionName, tags, isNew, isArchived, isDeleted }: { noteId: string; initialTitle: string; initialContent: unknown; collectionName?: string; tags?: Tag[]; isNew?: boolean; isArchived?: boolean; isDeleted?: boolean }) {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [saving, setSaving] = useState(false);
@@ -186,6 +186,26 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
           </DropdownMenu>
         </div>
       </div>
+
+      {isArchived && !isDeleted && (
+        <div className="mx-auto w-full max-w-[1040px] px-4 md:px-12 pt-4">
+          <div className="flex items-center gap-3 rounded-xl bg-[var(--card-muted)] p-3 text-sm">
+            <Icon icon={Archive} size={18} className="text-[var(--text-muted)]" />
+            <span className="flex-1">Catatan ini ada di Arsip</span>
+            <Button size="sm" variant="secondary" onClick={() => { unarchiveNote(noteId); router.refresh(); }}>Keluarkan dari arsip</Button>
+          </div>
+        </div>
+      )}
+
+      {isDeleted && (
+        <div className="mx-auto w-full max-w-[1040px] px-4 md:px-12 pt-4">
+          <div className="flex items-center gap-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 p-3 text-sm">
+            <Icon icon={Trash} size={18} className="text-rose-600" />
+            <span className="flex-1">Catatan ini ada di Sampah</span>
+            <Button size="sm" variant="secondary" onClick={() => { restoreNote(noteId); router.refresh(); }}>Pulihkan</Button>
+          </div>
+        </div>
+      )}
 
       <div className="mx-auto w-full max-w-[1040px] px-4 md:px-12 py-6">
         <div className="mb-1">
