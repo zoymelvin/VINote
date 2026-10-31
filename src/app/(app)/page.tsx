@@ -3,11 +3,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/db";
 import { useRouter } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Search } from "lucide-react";
+import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { EmptyState } from "@/components/ui/empty-state";
-import { NoteCard } from "@/components/notes/note-card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { NoteCard } from "@/components/shared/note-card";
 import { CommandPalette } from "@/components/ui/command-palette";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
@@ -62,23 +61,23 @@ export default function Home() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-8 overflow-x-hidden">
+    <div className="mx-auto w-full max-w-[1120px] p-4 md:p-8 space-y-8">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="font-display text-3xl font-normal tracking-tight md:text-4xl">{getGreeting()}</h1>
+          <h1 className="text-[28px] font-semibold tracking-tight md:text-[34px]">{getGreeting()}, zoymelvin</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">{new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <Button onClick={quickNote} className="hidden md:flex"><Icon icon={Plus} size={18} /> Baru</Button>
+          <Button onClick={quickNote} className="hidden md:flex"><Icon icon={require("@phosphor-icons/react").PencilSimpleLine} size={18} weight="regular" /> Catatan baru</Button>
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">Z</div>
         </div>
       </div>
 
       <button
         onClick={() => setPaletteOpen(true)}
-        className="flex h-12 w-full items-center gap-3 rounded-[24px] border border-[var(--border)] bg-[var(--card)] px-4 text-left text-[var(--text-muted)] transition hover:border-[var(--accent)]"
+        className="flex h-12 w-full items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-left text-[var(--text-muted)] transition hover:border-[var(--accent)]"
       >
-        <Icon icon={Search} size={20} />
+        <Icon icon={require("@phosphor-icons/react").MagnifyingGlass} size={20} weight="regular" />
         <span className="flex-1">Cari catatan, koleksi...</span>
         <kbd className="rounded-lg border border-[var(--border)] bg-[var(--card-muted)] px-2 py-1 text-xs text-[var(--text-muted)]">Ctrl K</kbd>
       </button>
@@ -111,10 +110,10 @@ export default function Home() {
 
       {list.length === 0 && (
         <EmptyState
-          icon={<Plus size={32} className="text-[var(--accent)]" />}
+          icon={<Icon icon={require("@phosphor-icons/react").Notebook} size={32} weight="duotone" className="text-[var(--accent)]" />}
           title="Belum ada catatan"
           description="Tekan tombol Baru untuk mulai menulis."
-          action={<Button onClick={quickNote}><Icon icon={Plus} size={18} /> Buat catatan</Button>}
+          action={<Button onClick={quickNote}><Icon icon={require("@phosphor-icons/react").PencilSimpleLine} size={18} weight="regular" /> Buat catatan</Button>}
         />
       )}
 

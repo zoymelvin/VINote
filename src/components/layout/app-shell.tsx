@@ -2,48 +2,45 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
-import { Home, History, FolderKanban, Settings, Plus, PanelLeftClose, PanelLeftOpen, FileText, CheckSquare, Code, Zap } from "lucide-react";
+import { Icon, IconTile } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { ToastHost } from "@/components/ui/toast";
-import { Icon, IconTile } from "@/components/ui/icon";
-import { createNote } from "@/lib/db/repo";
-import { listCollections } from "@/lib/db/repo";
-import type { Note } from "@/lib/notes/types";
+import { createNote, listCollections } from "@/lib/db/repo";
 import type { Collection } from "@/lib/notes/types";
 import * as m from "motion/react-m";
 import { useLiveQuery } from "dexie-react-hooks";
 
 const tabs = [
-  { href: "/", label: "Beranda", icon: Home },
-  { href: "/riwayat", label: "Riwayat", icon: History },
-  { href: "/koleksi", label: "Koleksi", icon: FolderKanban },
-  { href: "/pengaturan", label: "Pengaturan", icon: Settings },
+  { href: "/", label: "Beranda", icon: require("@phosphor-icons/react").House },
+  { href: "/riwayat", label: "Riwayat", icon: require("@phosphor-icons/react").ClockCounterClockwise },
+  { href: "/koleksi", label: "Koleksi", icon: require("@phosphor-icons/react").Stack },
+  { href: "/pengaturan", label: "Pengaturan", icon: require("@phosphor-icons/react").GearSix },
 ];
 
-const noteTypes: { type: Note["type"]; label: string; icon: typeof FileText }[] = [
-  { type: "text", label: "Teks", icon: FileText },
-  { type: "checklist", label: "Checklist", icon: CheckSquare },
-  { type: "code", label: "Kode", icon: Code },
-  { type: "quick", label: "Catatan Cepat", icon: Zap },
-  { type: "markdown", label: "Markdown", icon: FileText },
-  { type: "journal", label: "Jurnal", icon: FileText },
-  { type: "voice", label: "Suara", icon: FileText },
-  { type: "drawing", label: "Sketsa", icon: FileText },
-  { type: "bookmark", label: "Bookmark", icon: FileText },
-  { type: "template", label: "Template", icon: FileText },
+const noteTypes: { type: string; label: string; icon: typeof require("@phosphor-icons/react").NotePencil }[] = [
+  { type: "text", label: "Teks", icon: require("@phosphor-icons/react").NotePencil },
+  { type: "checklist", label: "Checklist", icon: require("@phosphor-icons/react").CheckSquare },
+  { type: "code", label: "Kode", icon: require("@phosphor-icons/react").CodeBlock },
+  { type: "quick", label: "Catatan Cepat", icon: require("@phosphor-icons/react").Lightning },
+  { type: "markdown", label: "Markdown", icon: require("@phosphor-icons/react").MarkdownLogo },
+  { type: "journal", label: "Jurnal", icon: require("@phosphor-icons/react").BookOpenText },
+  { type: "voice", label: "Suara", icon: require("@phosphor-icons/react").Microphone },
+  { type: "drawing", label: "Sketsa", icon: require("@phosphor-icons/react").Scribble },
+  { type: "bookmark", label: "Bookmark", icon: require("@phosphor-icons/react").Bookmark },
+  { type: "template", label: "Template", icon: require("@phosphor-icons/react").Layout },
 ];
 
 const collectionGradients: Record<string, string> = {
-  "📁": "from-gray-400 to-gray-500",
-  "💼": "from-blue-400 to-blue-600",
-  "🏠": "from-emerald-400 to-emerald-600",
-  "💡": "from-amber-400 to-amber-600",
-  "🎨": "from-pink-400 to-pink-600",
-  "📚": "from-indigo-400 to-indigo-600",
-  "🎯": "from-rose-400 to-rose-600",
-  "✈️": "from-sky-400 to-sky-600",
-  "💪": "from-orange-400 to-orange-600",
-  "🧘": "from-teal-400 to-teal-600",
+  Folder: "from-gray-400 to-gray-500",
+  Briefcase: "from-blue-400 to-blue-600",
+  House: "from-emerald-400 to-emerald-600",
+  Lightbulb: "from-amber-400 to-amber-600",
+  Palette: "from-pink-400 to-pink-600",
+  Books: "from-indigo-400 to-indigo-600",
+  Target: "from-rose-400 to-rose-600",
+  AirplaneTilt: "from-sky-400 to-sky-600",
+  Barbell: "from-orange-400 to-orange-600",
+  FlowerLotus: "from-teal-400 to-teal-600",
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -53,8 +50,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [fabOpen, setFabOpen] = useState(false);
   const collections = useLiveQuery(() => listCollections(), []);
 
-  async function newNote(type: (typeof noteTypes)[number]["type"]) {
-    const n = await createNote({ type, title: "" });
+  async function newNote(type: string) {
+    const n = await createNote({ type: type as any, title: "" });
     setFabOpen(false);
     router.push(`/catatan/${n.id}`);
   }
@@ -70,7 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent)] text-white">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
               </div>
-              <span className="font-display text-xl font-normal tracking-tight">VINOTE</span>
+              <span className="font-sans text-[15px] font-bold tracking-wide">VINOTE</span>
             </div>
           )}
           <button
@@ -78,7 +75,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             aria-label={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
             className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
-            {collapsed ? <PanelLeftOpen size={20} strokeWidth={1.75} /> : <PanelLeftClose size={20} strokeWidth={1.75} />}
+            <Icon icon={collapsed ? require("@phosphor-icons/react").PanelLeftOpen : require("@phosphor-icons/react").PanelLeftClose} size={20} weight="regular" />
           </button>
         </div>
         <nav className="flex flex-col gap-1">
@@ -90,11 +87,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={t.href}
                 aria-label={t.label}
                 className={cn(
-                  "flex items-center gap-3 rounded-2xl px-3 py-2 transition",
+                  "flex items-center gap-3 rounded-xl px-3 py-2 transition",
                   active ? "bg-[var(--card-muted)] font-medium" : "text-[var(--text-muted)] hover:bg-[var(--card-muted)]/60",
                 )}
               >
-                <Icon icon={t.icon} size={20} />
+                <Icon icon={t.icon} size={20} weight="regular" />
                 {!collapsed && <span>{t.label}</span>}
               </Link>
             );
@@ -105,19 +102,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="mb-2 flex items-center justify-between px-3">
               <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Koleksi</span>
               <button onClick={() => router.push("/koleksi")} className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Koleksi baru">
-                <Icon icon={Plus} size={20} />
+                <Icon icon={require("@phosphor-icons/react").Plus} size={20} weight="regular" />
               </button>
             </div>
             <div className="flex flex-col gap-0.5">
               {collapsibleCollections.map((c: Collection) => {
                 const active = path === `/koleksi/${c.id}`;
+                const iconKey = c.icon?.replace(/[^\p{Extended_Pictographic}]/gu, "").trim() || "📁";
+                const phosphorName = iconKey === "📁" ? "Folder" : iconKey === "💼" ? "Briefcase" : iconKey === "🏠" ? "House" : iconKey === "💡" ? "Lightbulb" : iconKey === "🎨" ? "Palette" : iconKey === "📚" ? "Books" : iconKey === "🎯" ? "Target" : iconKey === "✈️" ? "AirplaneTilt" : iconKey === "💪" ? "Barbell" : iconKey === "🧘" ? "FlowerLotus" : "Folder";
+                const IconComp = require("@phosphor-icons/react")[phosphorName] || require("@phosphor-icons/react").Folder;
                 return (
                   <Link
                     key={c.id}
                     href={`/koleksi/${c.id}`}
                     className={cn("flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm transition", active ? "bg-[var(--card-muted)] font-medium" : "text-[var(--text-muted)] hover:bg-[var(--card-muted)]/60")}
                   >
-                    <IconTile icon={FolderKanban} gradient={collectionGradients[c.icon || "📁"] || "from-gray-400 to-gray-500"} />
+                    <IconTile icon={IconComp} gradient={collectionGradients[phosphorName] || "from-gray-400 to-gray-500"} />
                     <span className="truncate">{c.name}</span>
                   </Link>
                 );
@@ -153,7 +153,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
-                <Icon icon={t.icon} size={24} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
+                <Icon icon={t.icon} size={24} weight="regular" className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
               </Link>
             );
           })}
@@ -166,7 +166,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="flex h-14 w-14 -translate-y-3 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[var(--shadow-2)] transition-transform active:scale-95"
               style={{ transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)" }}
             >
-              <Plus size={24} strokeWidth={1.75} />
+              <Icon icon={require("@phosphor-icons/react").Plus} size={24} weight="regular" />
             </button>
             {fabOpen && (
               <div className="absolute bottom-16 left-1/2 z-50 w-52 -translate-x-1/2 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-[var(--shadow-2)] backdrop-blur">
@@ -176,7 +176,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     onClick={() => newNote(nt.type)}
                     className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                   >
-                    <Icon icon={nt.icon} size={18} className="text-[var(--text-muted)]" />
+                    <Icon icon={nt.icon} size={18} weight="regular" className="text-[var(--text-muted)]" />
                     <span>{nt.label}</span>
                   </button>
                 ))}
@@ -195,7 +195,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
-                <Icon icon={t.icon} size={24} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
+                <Icon icon={t.icon} size={24} weight="regular" className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
               </Link>
             );
           })}
