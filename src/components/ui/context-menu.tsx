@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
+import { Slottable } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
 const ContextMenu = ContextMenuPrimitive.Root;
@@ -39,7 +40,7 @@ const ContextMenuItem = React.forwardRef<React.ComponentRef<typeof ContextMenuPr
       {...props}
     >
       {icon && <span className="shrink-0">{icon}</span>}
-      {children}
+      <Slottable>{children}</Slottable>
     </ContextMenuPrimitive.Item>
   )
 );

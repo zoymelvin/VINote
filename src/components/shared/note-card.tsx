@@ -12,7 +12,7 @@ import type { Note } from "@/lib/notes/types";
 import { useState, useRef } from "react";
 import * as m from "motion/react-m";
 import { NoteTypeIcon } from "@/components/shared/note-type-icon";
-import { DotsThree, PushPin, Bell } from "@phosphor-icons/react";
+import { DotsThree, PushPin, Copy, Archive, Trash, FolderSimplePlus, Bell } from "@phosphor-icons/react";
 
 export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
   const toast = useToast();
@@ -92,13 +92,13 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
                        <Icon icon={DotsThree} size={18} weight="bold" />
                      </button>
                    </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" onCloseAutoFocus={() => {}}>
-                    <DropdownMenuItem onSelect={onPin}>{note.isPinned ? "Lepas sematan" : "Sematkan"}</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => {}}>Tambahkan ke Koleksi...</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={onDuplicate}>Duplikat</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={onArchive}>{note.isArchived ? "Keluarkan dari arsip" : "Arsipkan"}</DropdownMenuItem>
+                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()} onCloseAutoFocus={() => {}}>
+                    <DropdownMenuItem icon={<Icon icon={PushPin} size={18} />} onSelect={onPin}>{note.isPinned ? "Lepas sematan" : "Sematkan"}</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={FolderSimplePlus} size={18} />} onSelect={() => {}}>Tambahkan ke Koleksi...</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={Copy} size={18} />} onSelect={onDuplicate}>Duplikat</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={Archive} size={18} />} onSelect={onArchive}>{note.isArchived ? "Keluarkan dari arsip" : "Arsipkan"}</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={remove} className="text-rose-600">Hapus</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={Trash} size={18} />} onSelect={remove} className="text-rose-600">Hapus</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

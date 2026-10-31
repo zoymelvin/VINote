@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { Slottable } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
@@ -41,7 +42,7 @@ const DropdownMenuItem = React.forwardRef<React.ComponentRef<typeof DropdownMenu
       {...props}
     >
       {icon && <span className="shrink-0">{icon}</span>}
-      {children}
+      <Slottable>{children}</Slottable>
     </DropdownMenuPrimitive.Item>
   )
 );
