@@ -10,10 +10,10 @@ function block(css: string, selector: string) {
   return m[1];
 }
 
-function vars(cssBlock: string) {
+function vars(cssBlock: string): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const m of cssBlock.matchAll(/(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{3,6})/g)) {
-    out[m[1]] = m[2];
+  for (const m of cssBlock.matchAll(/(--[\w-]+)\s*:\s*([^;]+)/g)) {
+    out[m[1]] = m[2].trim();
   }
   return out;
 }
@@ -23,7 +23,13 @@ describe("note color contrast", () => {
   const light = vars(block(css, ":root"));
   const dark = vars(block(css, ".dark"));
 
-  const colors = ["neutral", "pink", "orange", "yellow", "green", "teal", "blue", "purple", "lavender", "stone"];
+  function resolveVar(value: string, vars: Record<string, string>): string {
+    const m = value.match(/var\((--[^)]+)\)/);
+    if (m && vars[m[1]]) return resolveVar(vars[m[1]], vars);
+    return value;
+  }
+
+  const colors = ["polos", "mawar", "pink", "violet", "indigo", "langit", "teal", "zamrud", "lime"];
 
   for (const theme of [
     { name: "light", vars: light },
@@ -31,8 +37,8 @@ describe("note color contrast", () => {
   ]) {
     for (const c of colors) {
       it(`${theme.name} ${c} >= 4.5`, () => {
-        const bg = theme.vars[`--note-${c}-bg`];
-        const fg = theme.vars[`--note-${c}-fg`];
+        const bg = resolveVar(theme.vars[`--note-${c}-bg`] || "", theme.vars);
+        const fg = resolveVar(theme.vars[`--note-${c}-fg`] || "", theme.vars);
         expect(bg).toBeTruthy();
         expect(fg).toBeTruthy();
         expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(4.5);

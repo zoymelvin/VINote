@@ -12,28 +12,27 @@ export const NOTE_TYPE_LABEL: Record<string, string> = {
 };
 
 export const NOTE_COLOR_LABEL: Record<string, string> = {
-  neutral: "Netral",
-  pink: "Merah Muda",
-  orange: "Oranye",
-  yellow: "Kuning",
-  green: "Hijau",
+  neutral: "Polos",
+  mawar: "Mawar",
+  pink: "Pink",
+  violet: "Violet",
+  indigo: "Indigo",
+  langit: "Langit",
   teal: "Teal",
-  blue: "Biru",
-  purple: "Ungu",
-  lavender: "Lavender",
-  stone: "Abu Batu",
+  zamrud: "Zamrud",
+  lime: "Lime",
 };
 
 export const ACCENT_LABEL: Record<string, string> = {
   indigo: "Biru Tua",
-  rose: "Merah Muda",
+  rose: "Mawar",
   sky: "Langit",
   emerald: "Zamrud",
   violet: "Ungu",
   slate: "Abu",
   orange: "Oranye",
   teal: "Teal",
-  pink: "Merah Muda",
+  pink: "Pink",
   amber: "Kuning",
   cyan: "Sian",
   fuchsia: "Fuksia",

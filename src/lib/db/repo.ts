@@ -1,6 +1,7 @@
 import { db } from "@/lib/db/db";
-import type { Note, Collection, Tag, CardColor, Settings } from "@/lib/notes/types";
+import type { Note, Collection, Tag, CardColor, Settings, NoteCollection } from "@/lib/notes/types";
 import { uid, now } from "@/lib/utils";
+import { normalizeCardColor } from "@/lib/notes/types";
 import Fuse from "fuse.js";
 
 export async function createNote(input: Partial<Note> = {}): Promise<Note> {
@@ -12,7 +13,7 @@ export async function createNote(input: Partial<Note> = {}): Promise<Note> {
     title: input.title ?? "",
     content: input.content ?? { type: "doc", content: [{ type: "paragraph" }] },
     contentText: input.contentText ?? "",
-    color: input.color ?? "neutral",
+    color: normalizeCardColor(input.color),
     folderId: input.folderId ?? null,
     isPinned: input.isPinned ?? false,
     isFavorite: input.isFavorite ?? false,
@@ -27,6 +28,9 @@ export async function createNote(input: Partial<Note> = {}): Promise<Note> {
     version: input.version ?? 1,
   };
   await db.notes.put(note);
+  if (input.folderId) {
+    await addNoteToCollections(note.id, [input.folderId], note.userId);
+  }
   return note;
 }
 
@@ -61,6 +65,7 @@ export async function updateNote(id: string, patch: Partial<Note>) {
     id,
     updatedAt: patch.updatedAt ?? now(),
     version: changed ? current.version + 1 : current.version,
+    color: patch.color ? normalizeCardColor(patch.color) : current.color,
   };
   await db.notes.put(updated);
   return updated;
@@ -82,6 +87,7 @@ export async function hardDeleteNote(id: string) {
   await db.notes.delete(id);
   await db.revisions.where("noteId").equals(id).delete();
   await db.noteTags.where("noteId").equals(id).delete();
+  await db.noteCollections.where("noteId").equals(id).delete();
 }
 
 export async function emptyTrash() {
@@ -92,7 +98,10 @@ export async function emptyTrash() {
 export async function duplicateNote(id: string) {
   const n = await db.notes.get(id);
   if (!n) return null;
-  return createNote({ ...n, id: undefined, title: `${n.title} (salinan)`, createdAt: undefined, updatedAt: undefined });
+  const collections = (await getCollectionsOfNote(id)).map((c) => c.id);
+  const dup = await createNote({ ...n, id: undefined, title: `${n.title} (salinan)`, createdAt: undefined, updatedAt: undefined });
+  if (collections.length) await addNoteToCollections(dup.id, collections, dup.userId);
+  return dup;
 }
 
 export async function archiveNote(id: string) {
@@ -123,7 +132,16 @@ export async function listNotes(filter?: { includeDeleted?: boolean; archived?: 
   let all = await db.notes.toArray();
   if (!filter?.includeDeleted) all = all.filter((n) => !n.deletedAt);
   if (filter?.archived === false) all = all.filter((n) => !n.isArchived);
-  if (filter?.collectionId !== undefined) all = all.filter((n) => n.folderId === filter.collectionId);
+  if (filter?.collectionId !== undefined && filter.collectionId !== null) {
+    const noteIds = new Set(
+      (await db.noteCollections.where("collectionId").equals(filter.collectionId).filter((r) => !r.deletedAt).toArray()).map((r) => r.noteId)
+    );
+    if (noteIds.size) {
+      all = all.filter((n) => noteIds.has(n.id));
+    } else {
+      all = [];
+    }
+  }
   return all.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
 }
 
@@ -145,9 +163,14 @@ export async function searchNotes(query: string, tagIds?: string[]) {
   }
   if (!query.trim()) return filtered;
   const fuse = new Fuse(filtered, {
-    keys: ["title", "contentText"],
+    keys: [
+      { name: "title", weight: 0.5 },
+      { name: "contentText", weight: 0.3 },
+    ],
     threshold: 0.35,
     includeMatches: true,
+    ignoreLocation: true,
+    useExtendedSearch: false,
   });
   return fuse.search(query).map((r) => r.item);
 }
@@ -176,10 +199,16 @@ export async function restoreRevision(noteId: string, revisionId: string) {
 // Collections
 export async function createCollection(input: Partial<Collection> = {}) {
   const t = now();
+  const name = input.name?.trim() || "Koleksi baru";
+  const userId = input.userId ?? "";
+  const existing = await db.folders.filter((f) => !f.deletedAt && (f.userId || "") === userId && f.name.toLowerCase() === name.toLowerCase()).first();
+  if (existing) {
+    return existing;
+  }
   const collection: Collection = {
     id: input.id ?? uid(),
     userId: input.userId,
-    name: input.name ?? "Koleksi baru",
+    name,
     color: input.color ?? "#6366f1",
     icon: input.icon ?? "📁",
     description: input.description ?? "",
@@ -219,6 +248,55 @@ export async function softDeleteCollection(id: string) {
 export async function listSmartCollections() {
   const all = await db.folders.filter((f) => !f.deletedAt && f.smartRule !== null).toArray();
   return all;
+}
+
+// Multi-collection
+export async function addNoteToCollections(noteId: string, collectionIds: string[], userId?: string) {
+  const t = now();
+  const rels: NoteCollection[] = collectionIds.map((cid) => ({
+    noteId,
+    collectionId: cid,
+    userId,
+    createdAt: t,
+    updatedAt: t,
+    deletedAt: null,
+  }));
+  await db.noteCollections.bulkPut(rels);
+}
+
+export async function removeNoteFromCollection(noteId: string, collectionId: string) {
+  await db.noteCollections.where("[noteId+collectionId]").equals([noteId, collectionId]).modify({ deletedAt: now() });
+}
+
+export async function setNoteCollections(noteId: string, collectionIds: string[], userId?: string) {
+  const existing = await db.noteCollections.where("noteId").equals(noteId).toArray();
+  const target = new Set(collectionIds);
+  const toRemove = existing.filter((r) => !target.has(r.collectionId) && !r.deletedAt);
+  const toAdd = collectionIds.filter((cid) => !existing.some((r) => r.collectionId === cid && !r.deletedAt));
+  await db.noteCollections.where("[noteId+collectionId]").anyOf(toRemove.map((r) => [r.noteId, r.collectionId])).modify({ deletedAt: now() });
+  if (toAdd.length) await addNoteToCollections(noteId, toAdd, userId);
+}
+
+export async function getCollectionsOfNote(noteId: string) {
+  const rels = await db.noteCollections.where("noteId").equals(noteId).filter((r) => !r.deletedAt).toArray();
+  const collections = await db.folders.bulkGet(rels.map((r) => r.collectionId));
+  return collections.filter((c): c is Collection => !!c && !c.deletedAt);
+}
+
+export async function getNotesOfCollection(collectionId: string) {
+  const rels = await db.noteCollections.where("collectionId").equals(collectionId).filter((r) => !r.deletedAt).toArray();
+  const notes = await db.notes.bulkGet(rels.map((r) => r.noteId));
+  return notes.filter((n): n is Note => !!n && !n.deletedAt).sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+}
+
+export async function countByCollection() {
+  const all = await db.noteCollections.toArray();
+  const counts: Record<string, number> = {};
+  for (const r of all) {
+    if (r.deletedAt) continue;
+    counts[r.collectionId] = (counts[r.collectionId] || 0) + 1;
+  }
+  return counts;
 }
 
 // Tags

@@ -11,16 +11,15 @@ export type NoteType =
   | "template";
 
 export type CardColor =
-  | "neutral"
+  | "polos"
+  | "mawar"
   | "pink"
-  | "orange"
-  | "yellow"
-  | "green"
+  | "violet"
+  | "indigo"
+  | "langit"
   | "teal"
-  | "blue"
-  | "purple"
-  | "lavender"
-  | "stone";
+  | "zamrud"
+  | "lime";
 
 export interface Note {
   id: string;
@@ -125,6 +124,15 @@ export interface Settings {
   privacyMode: boolean;
 }
 
+export interface NoteCollection {
+  noteId: string;
+  collectionId: string;
+  userId?: string;
+  createdAt: number;
+  updatedAt: number;
+  deletedAt: number | null;
+}
+
 export interface OutboxItem {
   id?: number;
   table: string;
@@ -135,16 +143,31 @@ export interface OutboxItem {
 }
 
 export const NOTE_COLORS: CardColor[] = [
-  "neutral",
+  "polos",
+  "mawar",
   "pink",
-  "orange",
-  "yellow",
-  "green",
+  "violet",
+  "indigo",
+  "langit",
   "teal",
-  "blue",
-  "purple",
-  "lavender",
-  "stone",
+  "zamrud",
+  "lime",
 ];
 
 export const EMPTY_NOTE_CONTENT = { type: "doc", content: [{ type: "paragraph" }] };
+
+export function normalizeCardColor(color: string | undefined): CardColor {
+  const legacy: Record<string, CardColor> = {
+    neutral: "polos",
+    orange: "mawar",
+    yellow: "lime",
+    green: "zamrud",
+    blue: "langit",
+    purple: "indigo",
+    lavender: "violet",
+    stone: "polos",
+  };
+  if (!color) return "polos";
+  if ((NOTE_COLORS as string[]).includes(color)) return color as CardColor;
+  return legacy[color] ?? "polos";
+}
