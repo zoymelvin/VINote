@@ -2,15 +2,17 @@
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
-import { Toggle } from "@/components/ui/toggle";
 import { Segmented } from "@/components/ui/segmented";
 import { SettingsRow } from "@/components/ui/settings-row";
+import { Dialog } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Palette, Monitor, Type, Shield, Download, HelpCircle, LogOut, Trash2 } from "lucide-react";
+import { Palette, Monitor, Download, HelpCircle, LogOut, Trash2, User } from "lucide-react";
 import { Icon } from "@/components/ui/icon";
 import { ACCENT_LABEL, THEME_LABEL } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 
 const ACCENTS = [
   { id: "indigo", color: "#6366f1" },
@@ -29,8 +31,10 @@ const ACCENTS = [
 
 export default function PengaturanPage() {
   const { theme, setTheme, setAccent } = useTheme();
-  const [pin, setPin] = useState(false);
   const router = useRouter();
+  const [editOpen, setEditOpen] = useState(false);
+  const [displayName, setDisplayName] = useState("zoymelvin");
+  const [username, setUsername] = useState("zoymelvin");
   async function signOut() {
     const supabase = createClient();
     if (!supabase) return;
@@ -43,10 +47,11 @@ export default function PengaturanPage() {
 
       <div className="flex items-center gap-4 rounded-[24px] bg-[var(--card)] p-4 shadow-[var(--shadow-1)]">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-lg font-bold text-white">Z</div>
-        <div>
+        <div className="min-w-0">
           <div className="font-semibold">Akun</div>
           <div className="text-xs text-[var(--text-muted)]">zoymelvin@email.com</div>
         </div>
+        <Button variant="secondary" className="ml-auto" onClick={() => setEditOpen(true)}><Icon icon={User} size={16} /> Edit profil</Button>
       </div>
 
       <section className="space-y-3">
@@ -72,20 +77,6 @@ export default function PengaturanPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)]">Editor</h2>
-        <SettingsRow icon={<Icon icon={Type} size={20} />} label="Font editor" description="Sans">
-          <Segmented options={[{ id: "sans", label: "Sans" }, { id: "serif", label: "Serif" }, { id: "mono", label: "Mono" }]} value="sans" onChange={() => {}} />
-        </SettingsRow>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)]">Keamanan</h2>
-        <SettingsRow icon={<Icon icon={Shield} size={20} />} label="Kunci aplikasi PIN" description="Lindungi catatan dengan PIN">
-          <Toggle checked={pin} onCheckedChange={setPin} label="Kunci aplikasi PIN" />
-        </SettingsRow>
-      </section>
-
-      <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-muted)]">Data dan Cadangan</h2>
         <SettingsRow icon={<Icon icon={Download} size={20} />} label="Ekspor data" description="Simpan cadangan catatan">
           <Button size="sm" variant="secondary">Ekspor</Button>
@@ -106,8 +97,23 @@ export default function PengaturanPage() {
           <Button variant="danger" className="w-full" onClick={() => {}}><Icon icon={Trash2} size={18} /> Hapus semua data lokal</Button>
         </div>
       </section>
+
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} title="Edit profil">
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Nama tampilan</label>
+            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Nama tampilan" className="mt-1" />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Username</label>
+            <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" className="mt-1" />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="secondary" onClick={() => setEditOpen(false)}>Batal</Button>
+            <Button type="button" onClick={() => setEditOpen(false)}>Simpan</Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }
-
-import { cn } from "@/lib/utils";
