@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter, Archive, Trash } from "@phosphor-icons/react";
+import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter, Archive, Trash, FolderSimplePlus } from "@phosphor-icons/react";
 import type { Collection, Tag } from "@/lib/notes/types";
 
 const lowlight = createLowlight(common);
@@ -167,6 +167,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       <div className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/90 p-3 backdrop-blur">
         <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
+          <Button variant="ghost" size="sm" onClick={() => {}} title="Tambahkan ke koleksi"><Icon icon={FolderSimplePlus} size={16} />{collections?.length ? ` ${collections.length}` : ""}</Button>
           <span className="text-sm text-[var(--text-muted)]">{saving ? "Menyimpan..." : "Tersimpan"}</span>
         </div>
         <div className="flex items-center gap-1">
