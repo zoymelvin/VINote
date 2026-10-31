@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/db/db";
 import { softDeleteNote, togglePinNote, duplicateNote, archiveNote, unarchiveNote } from "@/lib/db/repo";
@@ -14,14 +13,15 @@ import { useReducedMotion } from "motion/react";
 import { NoteTypeIcon } from "@/components/shared/note-type-icon";
 import { DotsThree } from "@phosphor-icons/react";
 
-export function NoteRow({ note, onPreview, compact }: { note: Note; onPreview?: () => void; compact?: boolean }) {
+export function NoteRow({ note, onRemove, compact }: { note: Note; onRemove?: () => void; compact?: boolean }) {
   const toast = useToast();
   const router = useRouter();
   const reduced = useReducedMotion();
 
-  async function remove() {
+  async function handleRemove() {
     await softDeleteNote(note.id);
     toast.push({ message: "Dipindahkan ke Sampah", undo: async () => { await db.notes.update(note.id, { deletedAt: null }); } });
+    onRemove?.();
   }
 
   async function onPin() {
@@ -70,7 +70,7 @@ export function NoteRow({ note, onPreview, compact }: { note: Note; onPreview?: 
           <DropdownMenuItem onSelect={onDuplicate}>Duplikat</DropdownMenuItem>
           <DropdownMenuItem onSelect={onArchive}>{note.isArchived ? "Keluarkan dari arsip" : "Arsipkan"}</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={remove} className="text-rose-600">Hapus</DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleRemove} className="text-rose-600">Hapus</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </m.div>

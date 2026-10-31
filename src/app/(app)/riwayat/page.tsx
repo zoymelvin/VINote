@@ -5,7 +5,7 @@ import { db } from "@/lib/db/db";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Sheet } from "@/components/ui/sheet";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { groupHistoryDate } from "@/lib/utils";
 import { useToast } from "@/stores/toast";

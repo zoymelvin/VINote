@@ -1,7 +1,7 @@
 "use client";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/shared/page-header";
 import { Segmented } from "@/components/ui/segmented";
 import { SettingsRow } from "@/components/ui/settings-row";
 import { Dialog } from "@/components/ui/dialog";

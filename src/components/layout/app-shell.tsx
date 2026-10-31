@@ -9,13 +9,14 @@ import { createNote, listCollections } from "@/lib/db/repo";
 import type { Collection, Note } from "@/lib/notes/types";
 import * as m from "motion/react-m";
 import { useLiveQuery } from "dexie-react-hooks";
-import { House, ClockCounterClockwise, Stack, GearSix, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
+import { House, ClockCounterClockwise, Stack, GearSix, Archive, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
 
 const tabs = [
   { href: "/", label: "Beranda", icon: House },
   { href: "/riwayat", label: "Riwayat", icon: ClockCounterClockwise },
   { href: "/koleksi", label: "Koleksi", icon: Stack },
+  { href: "/arsip", label: "Arsip", icon: Archive },
   { href: "/pengaturan", label: "Pengaturan", icon: GearSix },
 ];
 
@@ -186,7 +187,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
           </div>
 
-          {tabs.slice(2).map((t) => {
+          {tabs.slice(3).map((t) => {
             const active = path === t.href;
             return (
               <Link key={t.href} href={t.href} aria-label={t.label} className="relative flex h-12 w-12 items-center justify-center">

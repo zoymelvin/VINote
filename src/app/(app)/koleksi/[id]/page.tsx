@@ -54,15 +54,15 @@ export default function KoleksiDetailPage() {
 
       {notes && notes.length === 0 ? (
         <EmptyState
-          icon={<Plus size={32} className="text-[var(--accent)]" />}
+          icon={<Icon icon={Plus} size={32} weight="regular" className="text-[var(--accent)]" />}
           title="Belum ada catatan"
           description="Tambahkan catatan pertama ke koleksi ini."
-          action={<Button onClick={addNoteHere}><Plus size={18} /> Catatan baru</Button>}
+          action={<Button onClick={addNoteHere}><Icon icon={Plus} size={18} weight="regular" /> Catatan baru</Button>}
         />
       ) : (
         <>
           <div className="mb-4">
-            <Button onClick={addNoteHere}><Plus size={18} /> Catatan baru di sini</Button>
+            <Button onClick={addNoteHere}><Icon icon={Plus} size={18} weight="regular" /> Catatan baru di sini</Button>
           </div>
           <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.04 } } }} initial="hidden" animate="show" className="columns-1 gap-3 sm:columns-2 lg:columns-3 [&>*]:break-inside-avoid [&>*]:mb-3">
             {(notes ?? []).map((n) => (
