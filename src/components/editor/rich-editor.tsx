@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import UnderlineExt from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import Highlight from "@tiptap/extension-highlight";
 import Placeholder from "@tiptap/extension-placeholder";
 import { TextStyle } from "@tiptap/extension-text-style";
@@ -25,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter, Archive, Trash, FolderSimplePlus } from "@phosphor-icons/react";
+import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter, Archive, Trash, FolderSimplePlus, ImageSquare } from "@phosphor-icons/react";
 import type { Collection, Tag } from "@/lib/notes/types";
 
 const lowlight = createLowlight(common);
@@ -53,6 +54,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       UnderlineExt,
       Link.configure({ openOnClick: false }),
       Highlight.configure({ multicolor: true }),
+      Image.configure({ inline: false, allowBase64: true }),
       Placeholder.configure({ placeholder: "Mulai menulis, atau ketik / untuk perintah" }),
       TextStyle,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -248,6 +250,22 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
             <ToolbarBtn onClick={toggleTaskList} active={editor?.isActive("taskList")}><Icon icon={CheckSquare} size={18} /></ToolbarBtn>
             <ToolbarBtn onClick={toggleBlockquote} active={editor?.isActive("blockquote")}><Icon icon={Quotes} size={18} /></ToolbarBtn>
             <ToolbarBtn onClick={toggleCodeBlock} active={editor?.isActive("codeBlock")}><Icon icon={BracketsSquare} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = "image/*";
+              input.onchange = (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    editor?.chain().focus().setImage({ src: reader.result as string }).run();
+                  };
+                  reader.readAsDataURL(file);
+                }
+              };
+              input.click();
+            }}><Icon icon={ImageSquare} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
