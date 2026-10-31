@@ -1,6 +1,6 @@
 "use client";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getCollection, updateCollection, softDeleteCollection, moveNoteToCollection, listNotes, createNote } from "@/lib/db/repo";
+import { getCollection, updateCollection, softDeleteCollection, getNotesOfCollection, createNote } from "@/lib/db/repo";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -18,7 +18,7 @@ export default function KoleksiDetailPage() {
   const router = useRouter();
   const reduced = useReducedMotion();
   const collection = useLiveQuery(() => getCollection(id), [id]);
-  const notes = useLiveQuery(() => listNotes({ collectionId: id }), [id]);
+  const notes = useLiveQuery(() => getNotesOfCollection(id), [id]);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(collection?.name ?? "");
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -31,7 +31,7 @@ export default function KoleksiDetailPage() {
   }
 
   async function addNoteHere() {
-    const n = await createNote({ folderId: id });
+    const n = await createNote({ type: "text", title: "" });
     router.push(`/catatan/${n.id}`);
   }
 
@@ -47,7 +47,7 @@ export default function KoleksiDetailPage() {
         {editing ? (
           <Input value={name} onChange={(e) => setName(e.target.value)} onBlur={saveName} onKeyDown={(e) => e.key === "Enter" && saveName()} autoFocus />
         ) : (
-          <h1 onClick={() => setEditing(true)} className="cursor-pointer text-2xl font-bold">{collection.name}</h1>
+          <h1 onClick={() => setEditing(true)} className="cursor-pointer font-display text-2xl font-normal tracking-tight md:text-3xl">{collection.name}</h1>
         )}
       </div>
 
@@ -77,7 +77,7 @@ export default function KoleksiDetailPage() {
         <div className="space-y-4">
           <p className="text-sm text-[var(--text-muted)]">Pilih cara penghapusan:</p>
           <div className="flex flex-col gap-2">
-            <Button variant="secondary" onClick={() => { moveNoteToCollection(collection.id, null); removeCollection(); }}>Hapus koleksi saja (catatan ke Tanpa Koleksi)</Button>
+            <Button variant="secondary" onClick={() => { removeCollection(); }}>Hapus koleksi saja (catatan tetap ada)</Button>
             <Button variant="danger" onClick={removeCollection}>Hapus koleksi beserta catatannya</Button>
           </div>
         </div>
