@@ -6,13 +6,17 @@ import { Segmented } from "@/components/ui/segmented";
 import { SettingsRow } from "@/components/ui/settings-row";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Field } from "@/components/shared/field";
+import { Avatar } from "@/components/shared/avatar";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Palette, Monitor, Download, Question, SignOut, Trash, User } from "@phosphor-icons/react";
+import { Palette, Monitor, Download, Question, SignOut, Trash, User, Camera } from "@phosphor-icons/react";
 import { Icon } from "@/components/icons";
 import { ACCENT_LABEL, THEME_LABEL } from "@/lib/labels";
 import { cn } from "@/lib/utils";
+import { useProfile } from "@/stores/profile";
+import { db } from "@/lib/db/db";
 
 const ACCENTS = [
   { id: "indigo", color: "#6366f1" },
@@ -32,24 +36,49 @@ const ACCENTS = [
 export default function PengaturanPage() {
   const { theme, setTheme, setAccent } = useTheme();
   const router = useRouter();
+  const profile = useProfile();
   const [editOpen, setEditOpen] = useState(false);
-  const [displayName, setDisplayName] = useState("zoymelvin");
-  const [username, setUsername] = useState("zoymelvin");
+  const [displayName, setDisplayName] = useState(profile.displayName);
+  const [username, setUsername] = useState(profile.username);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatarUrl);
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    const url = URL.createObjectURL(file);
+    setAvatarPreview(url);
+  }
+
+  async function saveProfile() {
+    const updated = {
+      displayName: displayName.trim() || profile.displayName,
+      username: username.trim() || profile.username,
+      email: profile.email,
+      avatarUrl: avatarPreview,
+    };
+    await db.meta.put({ key: "profile", value: updated });
+    setEditOpen(false);
+  }
+
   async function signOut() {
     const supabase = createClient();
     if (!supabase) return;
     await supabase.auth.signOut();
     router.push("/login");
   }
+
   return (
     <div className="p-4 md:p-8 space-y-6 overflow-x-hidden">
       <PageHeader title="Pengaturan" description="Kelola preferensi aplikasi" />
 
       <div className="flex items-center gap-4 rounded-[24px] bg-[var(--card)] p-4 shadow-[var(--shadow-1)]">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-lg font-bold text-white">Z</div>
+        <Avatar src={avatarPreview ?? undefined} alt={profile.displayName} initials={profile.displayName.charAt(0).toUpperCase()} size={48} />
         <div className="min-w-0">
-          <div className="font-semibold">Akun</div>
-          <div className="text-xs text-[var(--text-muted)]">zoymelvin@email.com</div>
+          <div className="font-semibold">{profile.displayName}</div>
+          <div className="text-xs text-[var(--text-muted)]">@{profile.username}</div>
+          <div className="text-xs text-[var(--text-muted)]">{profile.email}</div>
         </div>
         <Button variant="secondary" className="ml-auto" onClick={() => setEditOpen(true)}><Icon icon={User} size={16} /> Edit profil</Button>
       </div>
@@ -99,18 +128,31 @@ export default function PengaturanPage() {
       </section>
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} title="Edit profil">
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Nama tampilan</label>
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Nama tampilan" className="mt-1" />
+        <div className="space-y-6">
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative">
+              <Avatar src={avatarPreview ?? undefined} alt={displayName} initials={displayName.charAt(0).toUpperCase()} size={96} className="rounded-full object-cover" />
+              <label className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)] text-white cursor-pointer shadow-[var(--shadow-1)]">
+                <Icon icon={Camera} size={16} />
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+              </label>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="secondary" onClick={() => { setAvatarPreview(null); setAvatarFile(null); }}>Hapus foto</Button>
+            </div>
           </div>
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Username</label>
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" className="mt-1" />
-          </div>
+          <Field label="Nama tampilan">
+            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Nama tampilan" />
+          </Field>
+          <Field label="Username">
+            <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" />
+          </Field>
+          <Field label="Email">
+            <Input value={profile.email} disabled placeholder="email@contoh.com" />
+          </Field>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setEditOpen(false)}>Batal</Button>
-            <Button type="button" onClick={() => setEditOpen(false)}>Simpan</Button>
+            <Button type="button" onClick={saveProfile}>Simpan</Button>
           </div>
         </div>
       </Dialog>
