@@ -15,18 +15,41 @@ export default function NotePage() {
   const collections = useLiveQuery(() => listCollections(), []);
   const tags = useLiveQuery(() => noteTags(id), [id]);
 
+  const isNew = useMemo(() => {
+    if (note !== undefined) return false;
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  }, [note, id]);
+
   const collection = useMemo(() => (collections ?? []).find((c) => c.id === note?.folderId), [collections, note?.folderId]);
 
-  if (!note) return <div className="p-4">Memuat...</div>;
-  return (
-    <div>
-      <RichEditor
-        noteId={note.id}
-        initialTitle={note.title}
-        initialContent={note.content}
-        collectionName={collection?.name}
-        tags={tags}
-      />
-    </div>
-  );
+  if (note) {
+    return (
+      <div>
+        <RichEditor
+          noteId={note.id}
+          initialTitle={note.title}
+          initialContent={note.content}
+          collectionName={collection?.name}
+          tags={tags}
+        />
+      </div>
+    );
+  }
+
+  if (isNew) {
+    return (
+      <div>
+        <RichEditor
+          noteId={id}
+          initialTitle=""
+          initialContent={{ type: "doc", content: [{ type: "paragraph" }] }}
+          collectionName={undefined}
+          tags={[]}
+          isNew
+        />
+      </div>
+    );
+  }
+
+  return <div className="p-4">Memuat...</div>;
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
+import UnderlineExt from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Highlight from "@tiptap/extension-highlight";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -17,7 +17,7 @@ import FontFamily from "@tiptap/extension-font-family";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { updateNote, togglePinNote, listCollections, moveNoteToCollection } from "@/lib/db/repo";
+import { updateNote, togglePinNote, listCollections, moveNoteToCollection, createNote } from "@/lib/db/repo";
 import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Pin, History, Maximize, Minimize, MoreHorizontal, ChevronDown } from "lucide-react";
+import { ArrowLeft, Pin, History, Maximize, Minimize, MoreHorizontal, ChevronDown, Heading1, Heading2, Heading3, Bold, Italic, Underline, Strikethrough, Code, List, ListOrdered, CheckSquare, Quote, SquareCode, AlignLeft, AlignCenter, AlignRight, AlignJustify, Type, Highlighter } from "lucide-react";
 import type { Collection, Tag } from "@/lib/notes/types";
 
 const lowlight = createLowlight(common);
@@ -36,20 +36,21 @@ const FONTS = [
   { id: "mono", label: "Mono", css: "ui-monospace, monospace" },
 ];
 
-export default function RichEditor({ noteId, initialTitle, initialContent, collectionName, tags }: { noteId: string; initialTitle: string; initialContent: unknown; collectionName?: string; tags?: Tag[] }) {
+export default function RichEditor({ noteId, initialTitle, initialContent, collectionName, tags, isNew }: { noteId: string; initialTitle: string; initialContent: unknown; collectionName?: string; tags?: Tag[]; isNew?: boolean }) {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [saving, setSaving] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [showReplace, setShowReplace] = useState(false);
   const [wordCount, setWordCount] = useState({ words: 0, chars: 0 });
+  const [created, setCreated] = useState(false);
   const collections = useLiveQuery(() => listCollections(), []);
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ codeBlock: false }),
-      Underline,
+      UnderlineExt,
       Link.configure({ openOnClick: false }),
       Highlight.configure({ multicolor: true }),
       Placeholder.configure({ placeholder: "Mulai menulis, atau ketik / untuk perintah" }),
@@ -66,13 +67,32 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     ],
     content: initialContent as never,
     immediatelyRender: false,
-    onUpdate: ({ editor }) => {
-      const text = editor.getText();
+    onUpdate: ({ editor: ed }) => {
+      const text = ed.getText();
       setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
+      if (isNew && !created) {
+        const hasContent = text.trim().length > 0 || title.trim().length > 0;
+        if (hasContent) {
+          createNote({ id: noteId, type: "text", title: title.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
+        }
+      }
     },
   });
+  const editorRef = useRef(editor);
 
   const html = editor?.getHTML();
+
+  useEffect(() => {
+    if (isNew && !created && title.trim().length > 0) {
+      const ed = editorRef.current;
+      if (!ed) return;
+      const text = ed.getText();
+      const hasContent = text.trim().length > 0;
+      if (hasContent) {
+        createNote({ id: noteId, type: "text", title: title.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
+      }
+    }
+  }, [isNew, created, title, noteId]);
 
   useEffect(() => {
     const vv = window.visualViewport;
@@ -92,6 +112,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
   }, [focusMode]);
 
   useEffect(() => {
+    if (isNew && !created) return;
     const t = setTimeout(async () => {
       if (!editor) return;
       setSaving(true);
@@ -100,7 +121,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       setSaving(false);
     }, 800);
     return () => clearTimeout(t);
-  }, [title, html, editor, noteId]);
+  }, [title, html, editor, noteId, isNew, created]);
 
   const toggleBold = useCallback(() => editor?.chain().focus().toggleBold().run(), [editor]);
   const toggleItalic = useCallback(() => editor?.chain().focus().toggleItalic().run(), [editor]);
@@ -199,37 +220,38 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
 
         <div className="mb-2 flex flex-wrap items-center gap-1 rounded-2xl bg-[var(--card)] p-1.5 shadow-[var(--shadow-1)]">
           <ToolbarGroup>
-            <ToolbarBtn onClick={() => setHeading(1)} active={editor?.isActive("heading", { level: 1 })}>H1</ToolbarBtn>
-            <ToolbarBtn onClick={() => setHeading(2)} active={editor?.isActive("heading", { level: 2 })}>H2</ToolbarBtn>
-            <ToolbarBtn onClick={() => setHeading(3)} active={editor?.isActive("heading", { level: 3 })}>H3</ToolbarBtn>
+            <ToolbarBtn onClick={() => setHeading(1)} active={editor?.isActive("heading", { level: 1 })}><Icon icon={Heading1} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setHeading(2)} active={editor?.isActive("heading", { level: 2 })}><Icon icon={Heading2} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setHeading(3)} active={editor?.isActive("heading", { level: 3 })}><Icon icon={Heading3} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
-            <ToolbarBtn onClick={toggleBold} active={editor?.isActive("bold")}>B</ToolbarBtn>
-            <ToolbarBtn onClick={toggleItalic} active={editor?.isActive("italic")}>I</ToolbarBtn>
-            <ToolbarBtn onClick={toggleUnderline} active={editor?.isActive("underline")}>U</ToolbarBtn>
-            <ToolbarBtn onClick={toggleStrike} active={editor?.isActive("strike")}>S</ToolbarBtn>
-            <ToolbarBtn onClick={toggleCode} active={editor?.isActive("code")}>&lt;/&gt;</ToolbarBtn>
+            <ToolbarBtn onClick={toggleBold} active={editor?.isActive("bold")}><Icon icon={Bold} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleItalic} active={editor?.isActive("italic")}><Icon icon={Italic} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleUnderline} active={editor?.isActive("underline")}><Icon icon={Underline} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleStrike} active={editor?.isActive("strike")}><Icon icon={Strikethrough} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleCode} active={editor?.isActive("code")}><Icon icon={Code} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
-            <ToolbarBtn onClick={toggleBulletList} active={editor?.isActive("bulletList")}>•</ToolbarBtn>
-            <ToolbarBtn onClick={toggleOrderedList} active={editor?.isActive("orderedList")}>1.</ToolbarBtn>
-            <ToolbarBtn onClick={toggleTaskList} active={editor?.isActive("taskList")}>☑</ToolbarBtn>
-            <ToolbarBtn onClick={toggleBlockquote} active={editor?.isActive("blockquote")}>&ldquo;</ToolbarBtn>
-            <ToolbarBtn onClick={toggleCodeBlock} active={editor?.isActive("codeBlock")}>&lt;/&gt;</ToolbarBtn>
+            <ToolbarBtn onClick={toggleBulletList} active={editor?.isActive("bulletList")}><Icon icon={List} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleOrderedList} active={editor?.isActive("orderedList")}><Icon icon={ListOrdered} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleTaskList} active={editor?.isActive("taskList")}><Icon icon={CheckSquare} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleBlockquote} active={editor?.isActive("blockquote")}><Icon icon={Quote} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={toggleCodeBlock} active={editor?.isActive("codeBlock")}><Icon icon={SquareCode} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
-            <ToolbarBtn onClick={() => setAlign("left")} active={editor?.isActive({ textAlign: "left" })}>Kiri</ToolbarBtn>
-            <ToolbarBtn onClick={() => setAlign("center")} active={editor?.isActive({ textAlign: "center" })}>Tengah</ToolbarBtn>
-            <ToolbarBtn onClick={() => setAlign("right")} active={editor?.isActive({ textAlign: "right" })}>Kanan</ToolbarBtn>
+            <ToolbarBtn onClick={() => setAlign("left")} active={editor?.isActive({ textAlign: "left" })}><Icon icon={AlignLeft} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setAlign("center")} active={editor?.isActive({ textAlign: "center" })}><Icon icon={AlignCenter} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setAlign("right")} active={editor?.isActive({ textAlign: "right" })}><Icon icon={AlignRight} size={18} /></ToolbarBtn>
+            <ToolbarBtn onClick={() => setAlign("justify")} active={editor?.isActive({ textAlign: "justify" })}><Icon icon={AlignJustify} size={18} /></ToolbarBtn>
           </ToolbarGroup>
           <span className="w-px h-6 bg-[var(--border)]" />
           <ToolbarGroup>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex h-9 w-9 items-center justify-center rounded-xl text-sm hover:bg-[var(--card-muted)]">{FONTS.find(f => editor?.getAttributes("textStyle").fontFamily === f.css)?.label || "A"}</button>
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Font"><Icon icon={Type} size={18} /></button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {FONTS.map((f) => (
@@ -239,7 +261,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
             </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex h-9 w-9 items-center justify-center rounded-xl text-sm hover:bg-[var(--card-muted)]">Aa</button>
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Sorot"><Icon icon={Highlighter} size={18} /></button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem onClick={() => editor?.chain().focus().setHighlight({ color: "#fef08a" }).run()}>Sorot Kuning</DropdownMenuItem>
@@ -261,32 +283,14 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
 
         <EditorContent editor={editor} className="prose prose-lg max-w-none dark:prose-invert min-h-[50vh]" />
 
-        <div className="mt-6 flex items-center justify-between border-t border-[var(--border)] pt-3 text-xs text-[var(--text-muted)]">
-          <span>{wordCount.words} kata · {wordCount.chars} karakter</span>
-          <span>Estimasi {Math.max(1, Math.ceil(wordCount.words / 200))} min baca</span>
-        </div>
-      </div>
-
-      <style jsx global>{`
-        .tiptap { outline: none; line-height: 1.7; font-size: 16px; }
-        .tiptap p { margin: 0.5em 0; }
-        .tiptap h1 { font-size: 2em; font-weight: 700; margin: 0.5em 0; }
-        .tiptap h2 { font-size: 1.5em; font-weight: 600; margin: 0.5em 0; }
-        .tiptap h3 { font-size: 1.25em; font-weight: 600; margin: 0.5em 0; }
-        .tiptap ul, .tiptap ol { padding-left: 1.5em; }
-        .tiptap blockquote { border-left: 3px solid var(--accent); padding-left: 1em; margin-left: 0; color: var(--text-muted); }
-        .tiptap pre { background: var(--surface-2); padding: 1em; border-radius: 12px; overflow-x: auto; }
-        .tiptap code { background: var(--surface-2); padding: 0.2em 0.4em; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.9em; }
-        .tiptap pre code { background: none; padding: 0; }
-        .tiptap mark { border-radius: 2px; padding: 0.1em 0; }
-        .tiptap ul[data-type="taskList"] { list-style: none; padding-left: 0; }
-        .tiptap ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 0.5em; }
-        .tiptap ul[data-type="taskList"] li > label { margin-top: 0.2em; }
-        .tiptap ul[data-type="taskList"] li > div { flex: 1; }
-      `}</style>
-    </div>
-  );
-}
+         <div className="mt-6 flex items-center justify-between border-t border-[var(--border)] pt-3 text-xs text-[var(--text-muted)]">
+           <span>{wordCount.words} kata · {wordCount.chars} karakter</span>
+           <span>Estimasi {Math.max(1, Math.ceil(wordCount.words / 200))} min baca</span>
+         </div>
+       </div>
+     </div>
+     );
+   }
 
 function ToolbarGroup({ children }: { children: React.ReactNode }) {
   return <div className="flex items-center gap-0.5">{children}</div>;
