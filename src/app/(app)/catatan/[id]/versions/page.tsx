@@ -7,8 +7,6 @@ import type { Revision } from "@/lib/notes/types";
 import { useState } from "react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Icon } from "@/components/icons";
-import { ClockCounterClockwise, ArrowLeft } from "@phosphor-icons/react";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
 
