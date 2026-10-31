@@ -10,9 +10,10 @@ import { NoteCard } from "@/components/shared/note-card";
 import { CommandPalette } from "@/components/ui/command-palette";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
-import { getGreeting } from "@/lib/greeting";
 import { globalSearch } from "@/lib/search";
-import { PencilSimpleLine, MagnifyingGlass, Notebook } from "@phosphor-icons/react";
+import { PencilSimpleLine, MagnifyingGlass, Notebook, Plus } from "@phosphor-icons/react";
+import { Avatar } from "@/components/shared/avatar";
+import { useProfile } from "@/stores/profile";
 
 export default function Home() {
   const notes = useLiveQuery(() => db.notes.filter((n) => !n.deletedAt && !n.isArchived).toArray(), []);
@@ -61,31 +62,40 @@ export default function Home() {
     router.push(`/catatan/${n.id}`);
   }
 
-  return (
-    <div className="mx-auto w-full max-w-[1120px] p-4 md:p-8 space-y-8">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-[28px] font-semibold tracking-tight md:text-[34px]">{getGreeting()}, zoymelvin</h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">{new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <Button onClick={quickNote} className="hidden md:flex"><Icon icon={PencilSimpleLine} size={18} weight="regular" /> Catatan baru</Button>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">Z</div>
-        </div>
-      </div>
+  const profile = useProfile();
+  const initial = profile.displayName.charAt(0).toUpperCase();
 
-      <button
-        onClick={() => setPaletteOpen(true)}
-        className="flex h-12 w-full items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-left text-[var(--text-muted)] transition hover:border-[var(--accent)]"
-      >
-        <Icon icon={MagnifyingGlass} size={20} weight="regular" />
-        <span className="flex-1">Cari catatan, koleksi...</span>
-        <kbd className="rounded-lg border border-[var(--border)] bg-[var(--card-muted)] px-2 py-1 text-xs text-[var(--text-muted)]">Ctrl K</kbd>
-      </button>
+  return (
+    <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8 space-y-8">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur px-4 -mx-4 md:-mx-8 md:px-8">
+        <button
+          onClick={() => setPaletteOpen(true)}
+          className="flex h-11 flex-1 max-w-[640px] items-center gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--card)] px-4 text-left text-[var(--text-muted)] transition hover:border-[var(--accent)]"
+        >
+          <Icon icon={MagnifyingGlass} size={20} weight="regular" />
+          <span className="flex-1 text-sm">Cari catatan...</span>
+          <kbd className="rounded-lg border border-[var(--border)] bg-[var(--card-muted)] px-2 py-1 text-xs text-[var(--text-muted)]">Ctrl K</kbd>
+        </button>
+        <div className="flex-1" />
+        <button
+          onClick={quickNote}
+          className="flex h-11 items-center gap-2 rounded-[14px] px-4 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_var(--accent)] transition-transform hover:-translate-y-[1px] active:scale-[0.97]"
+          style={{
+            background: "linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 85%, black))",
+            boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.25), 0 8px 24px -8px var(--accent)",
+          }}
+        >
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
+            <Icon icon={Plus} size={16} weight="bold" />
+          </span>
+          Catatan baru
+        </button>
+        <Avatar src={profile.avatarUrl ?? undefined} alt={profile.displayName} initials={initial} size={36} />
+      </header>
 
       {pinned.length > 0 && (
         <section>
-          <h2 className="mb-3 text-sm font-semibold text-[var(--text-muted)]">Disematkan</h2>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Disematkan · {pinned.length}</h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {pinned.map((n) => (
               <div key={n.id} className="w-64 shrink-0">
@@ -98,7 +108,7 @@ export default function Home() {
 
       {recent.length > 0 && (
         <section>
-          <h2 className="mb-3 text-sm font-semibold text-[var(--text-muted)]">Terakhir diubah</h2>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Terakhir diubah · {recent.length}</h2>
           <m.div variants={container} initial="hidden" animate="show" className="columns-1 gap-3 sm:columns-2 lg:columns-3 xl:columns-4 [&>*]:break-inside-avoid [&>*]:mb-3">
             {recent.map((n, idx) => (
               <m.div key={n.id} variants={idx < 8 ? item : undefined}>
