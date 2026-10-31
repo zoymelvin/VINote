@@ -167,17 +167,14 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       <div className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/90 p-3 backdrop-blur">
         <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
-          <span className="text-sm text-[var(--text-muted)]">{collectionName || "Koleksi"}</span>
-          <CaretDown size={14} className="text-[var(--text-muted)]" />
+          <span className="text-sm text-[var(--text-muted)]">{saving ? "Menyimpan..." : "Tersimpan"}</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-xs text-[var(--text-muted)]">{saving ? "Menyimpan..." : "Tersimpan"}</span>
-          <Button variant="ghost" size="sm" onClick={onPin}><Icon icon={PushPin} size={16} /></Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push(`/catatan/${noteId}/versions`)}><Icon icon={ClockCounterClockwise} size={16} /></Button>
-          <Button variant="ghost" size="sm" onClick={() => setFocusMode(true)}><Icon icon={ArrowsOutSimple} size={16} /></Button>
+          <Button variant="ghost" size="sm" onClick={() => router.push(`/catatan/${noteId}/versions`)} title="Riwayat versi"><Icon icon={ClockCounterClockwise} size={16} /></Button>
+          <Button variant="ghost" size="sm" onClick={() => setFocusMode(true)} title="Mode fokus"><Icon icon={ArrowsOutSimple} size={16} /></Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm"><Icon icon={List} size={16} /></Button>
+              <Button variant="ghost" size="sm" title="Lainnya"><Icon icon={List} size={16} /></Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => {}}>Bagikan</DropdownMenuItem>
@@ -190,29 +187,20 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-[760px] px-4 py-6">
+      <div className="mx-auto w-full max-w-[1040px] px-4 md:px-12 py-6">
         <div className="mb-1">
           <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Judul</label>
         </div>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="mb-4 w-full bg-transparent text-3xl font-bold outline-none"
+          className="mb-4 w-full bg-transparent text-[36px] font-bold leading-tight outline-none text-[var(--text)] placeholder:text-[var(--text-muted)]"
           placeholder="Judul catatan"
+          style={{ fontFamily: "var(--font-sans)" }}
         />
         <div className="mb-6 h-0.5 bg-[var(--accent)] transition-transform origin-left" style={{ transform: title ? "scaleX(1)" : "scaleX(0)" }} />
 
         <div className="mb-4 flex flex-wrap gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-               <button className="flex items-center gap-1 rounded-xl bg-[var(--card-muted)] px-3 py-1.5 text-xs">{collectionName || "Koleksi"} <CaretDown size={12} /></button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {(collections ?? []).map((c: Collection) => (
-                <DropdownMenuItem key={c.id} onClick={() => { moveNoteToCollection(noteId, c.id); router.refresh(); }}>{c.name}</DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
           {tags?.map((t) => (
             <span key={t.id} className="rounded-full bg-[var(--card-muted)] px-3 py-1.5 text-xs">{t.name}</span>
           ))}
@@ -251,7 +239,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
           <ToolbarGroup>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                 <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Font"><Icon icon={TextAa} size={18} /></button>
+                <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Font"><Icon icon={TextAa} size={18} /></button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {FONTS.map((f) => (
@@ -281,7 +269,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
           </div>
         )}
 
-        <EditorContent editor={editor} className="prose prose-lg max-w-none dark:prose-invert min-h-[50vh]" />
+        <EditorContent editor={editor} className="vn-prose min-h-[50vh]" />
 
          <div className="mt-6 flex items-center justify-between border-t border-[var(--border)] pt-3 text-xs text-[var(--text-muted)]">
            <span>{wordCount.words} kata · {wordCount.chars} karakter</span>
@@ -300,6 +288,7 @@ function ToolbarBtn({ onClick, active, children }: { onClick: () => void; active
   return (
     <button
       onClick={onClick}
+      onMouseDown={(e) => e.preventDefault()}
       className={cn(
         "flex h-9 w-9 items-center justify-center rounded-xl text-sm transition",
         active ? "bg-[var(--accent)]/15 text-[var(--accent)]" : "hover:bg-[var(--card-muted)]"
