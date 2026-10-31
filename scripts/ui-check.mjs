@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 import fs from "node:fs";
 
-const routes = ["/", "/riwayat", "/folder", "/pengaturan"];
+const routes = ["/", "/riwayat", "/koleksi", "/pengaturan"];
 const viewports = [
   { width: 390, height: 844, name: "390x844" },
   { width: 1440, height: 900, name: "1440x900" },

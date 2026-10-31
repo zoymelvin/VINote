@@ -2,32 +2,29 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Home, History, Folder, Settings, Plus, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Home, History, FolderKanban, Settings, Plus, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ToastHost } from "@/components/ui/toast";
 import { Icon } from "@/components/ui/icon";
 import { createNote } from "@/lib/db/repo";
+import { listCollections } from "@/lib/db/repo";
 import type { Note } from "@/lib/notes/types";
+import type { Collection } from "@/lib/notes/types";
 import * as m from "motion/react-m";
+import { useLiveQuery } from "dexie-react-hooks";
 
 const tabs = [
   { href: "/", label: "Beranda", icon: Home },
   { href: "/riwayat", label: "Riwayat", icon: History },
-  { href: "/folder", label: "Folder", icon: Folder },
+  { href: "/koleksi", label: "Koleksi", icon: FolderKanban },
   { href: "/pengaturan", label: "Pengaturan", icon: Settings },
 ];
 
 const noteTypes: { type: Note["type"]; label: string }[] = [
   { type: "text", label: "Teks" },
   { type: "checklist", label: "Checklist" },
-  { type: "markdown", label: "Markdown" },
   { type: "code", label: "Kode" },
   { type: "quick", label: "Catatan Cepat" },
-  { type: "journal", label: "Jurnal" },
-  { type: "voice", label: "Suara" },
-  { type: "drawing", label: "Sketsa" },
-  { type: "bookmark", label: "Bookmark" },
-  { type: "template", label: "Template" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -35,6 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
+  const collections = useLiveQuery(() => listCollections(), []);
 
   async function newNote(type: (typeof noteTypes)[number]["type"]) {
     const n = await createNote({ type, title: "" });
@@ -45,12 +43,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-[100dvh] bg-[var(--background)]">
       <aside className={cn("hidden md:flex md:flex-col md:border-r md:border-[var(--border)] md:p-4 md:transition-all", collapsed ? "md:w-20" : "md:w-64")}>
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           {!collapsed && <div className="text-xl font-bold">VINOTE</div>}
           <button
             onClick={() => setCollapsed((v) => !v)}
             aria-label={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
             {collapsed ? <PanelLeftOpen size={20} strokeWidth={1.75} /> : <PanelLeftClose size={20} strokeWidth={1.75} />}
           </button>
@@ -74,9 +72,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+        {!collapsed && (
+          <div className="mt-6">
+            <div className="mb-2 flex items-center justify-between px-3">
+              <span className="text-xs font-semibold text-[var(--text-muted)]">Koleksi</span>
+              <button onClick={() => router.push("/koleksi")} className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)]" aria-label="Koleksi baru">
+                <Plus size={20} />
+              </button>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {(collections ?? []).slice(0, 8).map((c: Collection) => {
+                const active = path === `/koleksi/${c.id}`;
+                return (
+                  <Link
+                    key={c.id}
+                    href={`/koleksi/${c.id}`}
+                    className={cn("flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm transition", active ? "bg-[var(--card-muted)] font-medium" : "text-[var(--text-muted)] hover:bg-[var(--card-muted)]/60")}
+                  >
+                    <span className="text-base">{c.icon || "📁"}</span>
+                    <span className="truncate">{c.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </aside>
 
-      <main className="flex-1 pb-28 md:pb-6">{children}</main>
+      <main className="flex-1 pb-28 md:pb-6 min-w-0">{children}</main>
 
       <nav className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-24px)] max-w-md -translate-x-1/2 md:hidden">
         <div className="relative flex items-center justify-around rounded-[28px] border border-white/20 bg-[var(--card)]/75 px-2 py-2 shadow-[var(--shadow-2)] backdrop-blur-xl safe-bottom">

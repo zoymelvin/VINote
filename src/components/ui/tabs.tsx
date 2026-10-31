@@ -9,7 +9,7 @@ export function Tabs({ tabs, value, onChange }: { tabs: { id: string; label: str
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
-          className={cn("rounded-xl px-4 py-2 text-sm transition", value === t.id ? "bg-[var(--card)] shadow-[var(--shadow-1)]" : "text-[var(--muted)]")}
+          className={cn("flex h-11 min-h-[44px] items-center rounded-xl px-4 text-sm font-medium transition", value === t.id ? "bg-[var(--card)] shadow-[var(--shadow-1)]" : "text-[var(--muted)]")}
         >
           {t.label}
         </button>

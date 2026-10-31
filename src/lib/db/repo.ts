@@ -1,5 +1,5 @@
 import { db } from "@/lib/db/db";
-import type { Note, Folder, Tag, CardColor, Settings } from "@/lib/notes/types";
+import type { Note, Collection, Tag, CardColor, Settings } from "@/lib/notes/types";
 import { uid, now } from "@/lib/utils";
 import Fuse from "fuse.js";
 
@@ -12,7 +12,7 @@ export async function createNote(input: Partial<Note> = {}): Promise<Note> {
     title: input.title ?? "",
     content: input.content ?? { type: "doc", content: [{ type: "paragraph" }] },
     contentText: input.contentText ?? "",
-    color: input.color ?? "amber",
+    color: input.color ?? "neutral",
     folderId: input.folderId ?? null,
     isPinned: input.isPinned ?? false,
     isFavorite: input.isFavorite ?? false,
@@ -95,10 +95,35 @@ export async function duplicateNote(id: string) {
   return createNote({ ...n, id: undefined, title: `${n.title} (salinan)`, createdAt: undefined, updatedAt: undefined });
 }
 
-export async function listNotes(filter?: { includeDeleted?: boolean; archived?: boolean }) {
+export async function archiveNote(id: string) {
+  return updateNote(id, { isArchived: true });
+}
+
+export async function unarchiveNote(id: string) {
+  return updateNote(id, { isArchived: false });
+}
+
+export async function moveNoteToCollection(id: string, collectionId: string | null) {
+  return updateNote(id, { folderId: collectionId });
+}
+
+export async function togglePinNote(id: string) {
+  const n = await db.notes.get(id);
+  if (!n) return null;
+  return updateNote(id, { isPinned: !n.isPinned });
+}
+
+export async function toggleFavoriteNote(id: string) {
+  const n = await db.notes.get(id);
+  if (!n) return null;
+  return updateNote(id, { isFavorite: !n.isFavorite });
+}
+
+export async function listNotes(filter?: { includeDeleted?: boolean; archived?: boolean; collectionId?: string | null }) {
   let all = await db.notes.toArray();
   if (!filter?.includeDeleted) all = all.filter((n) => !n.deletedAt);
   if (filter?.archived === false) all = all.filter((n) => !n.isArchived);
+  if (filter?.collectionId !== undefined) all = all.filter((n) => n.folderId === filter.collectionId);
   return all.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
 }
 
@@ -113,9 +138,11 @@ export async function listTrash() {
 
 export async function searchNotes(query: string, tagIds?: string[]) {
   const all = await listNotes();
-  const filtered = tagIds?.length
-    ? all
-    : all;
+  let filtered = all;
+  if (tagIds?.length) {
+    const withTags = await Promise.all(all.map(async (n) => ({ note: n, tags: await noteTags(n.id) })));
+    filtered = withTags.filter(({ tags }) => tagIds.some((tid) => tags.some((t) => t.id === tid))).map(({ note }) => note);
+  }
   if (!query.trim()) return filtered;
   const fuse = new Fuse(filtered, {
     keys: ["title", "contentText"],
@@ -146,29 +173,38 @@ export async function restoreRevision(noteId: string, revisionId: string) {
   return updateNote(noteId, { title: rev.title, content: rev.content });
 }
 
-// Folders
-export async function createFolder(input: Partial<Folder> = {}) {
+// Collections
+export async function createCollection(input: Partial<Collection> = {}) {
   const t = now();
-  const folder: Folder = {
+  const collection: Collection = {
     id: input.id ?? uid(),
     userId: input.userId,
-    name: input.name ?? "Folder baru",
+    name: input.name ?? "Koleksi baru",
     color: input.color ?? "#6366f1",
+    icon: input.icon ?? "📁",
+    description: input.description ?? "",
+    cover: input.cover ?? "",
     parentId: input.parentId ?? null,
+    smartRule: input.smartRule ?? null,
+    isPinned: input.isPinned ?? false,
     sortOrder: input.sortOrder ?? t,
     createdAt: input.createdAt ?? t,
     updatedAt: input.updatedAt ?? t,
     deletedAt: null,
   };
-  await db.folders.put(folder);
-  return folder;
+  await db.folders.put(collection);
+  return collection;
 }
 
-export async function listFolders() {
+export async function listCollections() {
   return db.folders.filter((f) => !f.deletedAt).toArray();
 }
 
-export async function updateFolder(id: string, patch: Partial<Folder>) {
+export async function getCollection(id: string) {
+  return db.folders.get(id);
+}
+
+export async function updateCollection(id: string, patch: Partial<Collection>) {
   const current = await db.folders.get(id);
   if (!current) return null;
   const updated = { ...current, ...patch, id, updatedAt: now() };
@@ -176,8 +212,13 @@ export async function updateFolder(id: string, patch: Partial<Folder>) {
   return updated;
 }
 
-export async function softDeleteFolder(id: string) {
-  return updateFolder(id, { deletedAt: now() });
+export async function softDeleteCollection(id: string) {
+  return updateCollection(id, { deletedAt: now() });
+}
+
+export async function listSmartCollections() {
+  const all = await db.folders.filter((f) => !f.deletedAt && f.smartRule !== null).toArray();
+  return all;
 }
 
 // Tags

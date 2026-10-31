@@ -15,7 +15,7 @@ function toLocal(row: Record<string, unknown>): Note {
     title: String(row.title ?? ""),
     content: row.content ?? {},
     contentText: String(row.content_text ?? ""),
-    color: String(row.color ?? "amber") as Note["color"],
+    color: String(row.color ?? "neutral") as Note["color"],
     folderId: str(row.folder_id),
     isPinned: Boolean(row.is_pinned),
     isFavorite: Boolean(row.is_favorite),

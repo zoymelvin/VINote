@@ -1,7 +1,7 @@
 import Dexie, { type Table } from "dexie";
 import type {
   Note,
-  Folder,
+  Collection,
   Tag,
   NoteTag,
   Revision,
@@ -14,7 +14,7 @@ import type {
 
 export class VinoteDB extends Dexie {
   notes!: Table<Note, string>;
-  folders!: Table<Folder, string>;
+  folders!: Table<Collection, string>;
   tags!: Table<Tag, string>;
   noteTags!: Table<NoteTag, [string, string]>;
   revisions!: Table<Revision, string>;
@@ -39,6 +39,27 @@ export class VinoteDB extends Dexie {
       settings: "userId",
       outbox: "++id, table, createdAt",
       meta: "key",
+    });
+    this.version(2).stores({
+      notes: "id, userId, type, folderId, isPinned, isArchived, isFavorite, updatedAt, deletedAt, lastOpenedAt",
+      folders: "id, userId, parentId, updatedAt, deletedAt, isPinned",
+      tags: "id, userId, name",
+      noteTags: "[noteId+tagId], noteId, tagId, userId",
+      revisions: "id, noteId, userId, createdAt",
+      attachments: "id, noteId, userId, createdAt",
+      shares: "id, noteId, userId, token",
+      templates: "id, userId, type",
+      settings: "userId",
+      outbox: "++id, table, createdAt",
+      meta: "key",
+    }).upgrade((tx) => {
+      return tx.table("folders").toCollection().modify((c: Record<string, unknown>) => {
+        if (!("icon" in c)) c.icon = "";
+        if (!("description" in c)) c.description = "";
+        if (!("cover" in c)) c.cover = "";
+        if (!("smartRule" in c)) c.smartRule = null;
+        if (!("isPinned" in c)) c.isPinned = false;
+      });
     });
   }
 }

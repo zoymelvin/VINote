@@ -9,7 +9,7 @@ export function Button({ className, variant = "primary", size = "md", ...props }
     ghost: "bg-transparent text-[var(--foreground)] hover:bg-[var(--card-muted)]",
     danger: "bg-rose-600 text-white",
   };
-  const sizes = { sm: "h-9 px-3 text-sm", md: "h-11 px-4 text-sm", lg: "h-12 px-5 text-base" };
+  const sizes = { sm: "h-11 px-3 text-sm", md: "h-11 px-4 text-sm", lg: "h-12 px-5 text-base" };
   return <button className={cn(base, variants[variant], sizes[size], className)} {...props} />;
 }
 

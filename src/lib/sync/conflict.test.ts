@@ -9,7 +9,7 @@ function note(overrides: Partial<Note>): Note {
     title: "t",
     content: {},
     contentText: "",
-    color: "amber",
+    color: "neutral",
     folderId: null,
     isPinned: false,
     isFavorite: false,
