@@ -11,14 +11,16 @@ export type NoteType =
   | "template";
 
 export type CardColor =
-  | "amber"
-  | "rose"
-  | "sky"
-  | "emerald"
-  | "violet"
-  | "slate"
+  | "neutral"
+  | "pink"
   | "orange"
-  | "teal";
+  | "yellow"
+  | "green"
+  | "teal"
+  | "blue"
+  | "purple"
+  | "lavender"
+  | "stone";
 
 export interface Note {
   id: string;
@@ -42,12 +44,17 @@ export interface Note {
   version: number;
 }
 
-export interface Folder {
+export interface Collection {
   id: string;
   userId?: string;
   name: string;
   color: string;
+  icon: string;
+  description: string;
+  cover: string;
   parentId: string | null;
+  smartRule: Record<string, unknown> | null;
+  isPinned: boolean;
   sortOrder: number;
   createdAt: number;
   updatedAt: number;
@@ -128,14 +135,16 @@ export interface OutboxItem {
 }
 
 export const NOTE_COLORS: CardColor[] = [
-  "amber",
-  "rose",
-  "sky",
-  "emerald",
-  "violet",
-  "slate",
+  "neutral",
+  "pink",
   "orange",
+  "yellow",
+  "green",
   "teal",
+  "blue",
+  "purple",
+  "lavender",
+  "stone",
 ];
 
 export const EMPTY_NOTE_CONTENT = { type: "doc", content: [{ type: "paragraph" }] };

@@ -23,14 +23,16 @@ describe("note color contrast", () => {
   const light = vars(block(css, ":root"));
   const dark = vars(block(css, ".dark"));
 
+  const colors = ["neutral", "pink", "orange", "yellow", "green", "teal", "blue", "purple", "lavender", "stone"];
+
   for (const theme of [
     { name: "light", vars: light },
     { name: "dark", vars: dark },
   ]) {
-    for (let i = 1; i <= 8; i++) {
-      it(`${theme.name} note ${i} >= 4.5`, () => {
-        const bg = theme.vars[`--note-${i}-bg`];
-        const fg = theme.vars[`--note-${i}-fg`];
+    for (const c of colors) {
+      it(`${theme.name} ${c} >= 4.5`, () => {
+        const bg = theme.vars[`--note-${c}-bg`];
+        const fg = theme.vars[`--note-${c}-fg`];
         expect(bg).toBeTruthy();
         expect(fg).toBeTruthy();
         expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(4.5);
