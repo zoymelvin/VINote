@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/db/db";
-import { softDeleteNote, togglePinNote, duplicateNote, archiveNote, unarchiveNote } from "@/lib/db/repo";
+import { softDeleteNote, togglePinNote, duplicateNote, archiveNote, unarchiveNote, restoreNote } from "@/lib/db/repo";
 import { useToast } from "@/stores/toast";
 import { Icon } from "@/components/icons";
 import { openCollectionPicker } from "@/components/shared/collection-picker-provider";
@@ -14,9 +14,9 @@ import type { Note } from "@/lib/notes/types";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
 import { NoteTypeIcon } from "@/components/shared/note-type-icon";
-import { DotsThree } from "@phosphor-icons/react";
+import { DotsThree, ArrowCounterClockwise } from "@phosphor-icons/react";
 
-export function NoteRow({ note, onRemove, compact, archived }: { note: Note; onRemove?: () => void; compact?: boolean; archived?: boolean }) {
+export function NoteRow({ note, onRemove, compact, archived, trashed }: { note: Note; onRemove?: () => void; compact?: boolean; archived?: boolean; trashed?: boolean }) {
   const toast = useToast();
   const router = useRouter();
   const reduced = useReducedMotion();
@@ -52,6 +52,11 @@ export function NoteRow({ note, onRemove, compact, archived }: { note: Note; onR
     toast.push({ message: "Dikeluarkan dari arsip", undo: async () => { await archiveNote(note.id); } });
   }
 
+  async function onRestore() {
+    await restoreNote(note.id);
+    toast.push({ message: "Catatan dipulihkan", undo: async () => { await softDeleteNote(note.id); } });
+  }
+
   const color = note.color || "polos";
   return (
     <>
@@ -78,7 +83,11 @@ export function NoteRow({ note, onRemove, compact, archived }: { note: Note; onR
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-            {archived ? (
+            {trashed ? (
+              <DropdownMenuItem onSelect={onRestore}>
+                <Icon icon={ArrowCounterClockwise} size={18} /> Pulihkan
+              </DropdownMenuItem>
+            ) : archived ? (
               <>
                 <DropdownMenuItem onSelect={onUnarchive}>Keluarkan dari arsip</DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => { openCollectionPicker(note.id); }}>Tambahkan ke Koleksi...</DropdownMenuItem>
