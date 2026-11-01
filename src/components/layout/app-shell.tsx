@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   async function newNote(type: string) {
     const n = await createNote({ type: type as Note["type"], title: "" });
     setFabOpen(false);
-    router.push(`/catatan/${n.id}`);
+    router.push(`/catatan/${n.id}?mode=edit`);
   }
 
   const collapsibleCollections = useMemo(() => (collections ?? []).slice(0, 8), [collections]);

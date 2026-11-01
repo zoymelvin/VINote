@@ -43,7 +43,7 @@ export default function KoleksiDetailPage() {
 
   async function addNoteHere() {
     const n = await createNote({ type: "text", title: "", folderId: id });
-    router.push(`/catatan/${n.id}`);
+    router.push(`/catatan/${n.id}?mode=edit`);
   }
 
   async function removeCollection() {

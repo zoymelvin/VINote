@@ -66,21 +66,27 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
             layoutId={`note-${note.id}`}
             whileTap={{ scale: 0.985 }}
             className={cn(
-              "group relative cursor-pointer rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-1)] transition-transform [@media(hover:hover)]:hover:-translate-y-[1px]",
+              "group relative cursor-pointer overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-1)] transition-transform [@media(hover:hover)]:hover:-translate-y-[1px]",
               compact && "p-3"
             )}
             style={{ color: `var(--note-${color}-fg)` }}
           >
             <Link href={`/catatan/${note.id}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={`Buka catatan: ${getDisplayTitle(note)}`} />
             <div className="pointer-events-none">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <NoteTypeIcon type={note.type} size={18} />
-                  <h3 className={cn("font-semibold", compact ? "text-sm" : "text-base")}>{getDisplayTitle(note)}</h3>
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <div className="flex min-w-0 flex-1 items-start gap-2 pr-11">
+                  <h3 className={cn("line-clamp-2 min-w-0 break-words font-semibold", compact ? "text-sm" : "text-base")}>{getDisplayTitle(note)}</h3>
                 </div>
-                <div className="flex items-center gap-1 pointer-events-auto relative z-[2]">
-                  {note.isPinned && <Icon icon={PushPin} size={14} weight="fill" className="text-[var(--accent)]" />}
-                  <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+              </div>
+              <p className={cn("line-clamp-3 break-words text-[var(--text-muted)]", compact ? "text-xs" : "text-sm")}>{note.contentText || ""}</p>
+              <div className="mt-2 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <NoteTypeIcon type={note.type} size={14} />
+                <span>{new Date(note.updatedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+                {note.isPinned && <Icon icon={PushPin} size={14} weight="fill" className="text-[var(--accent)]" />}
+              </div>
+            </div>
+            <div className="pointer-events-auto absolute right-2 top-2 z-[2]">
+              <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
                     <DropdownMenuTrigger asChild>
                       <button
                         className={cn(
@@ -102,15 +108,12 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </div>
-              <p className={cn("line-clamp-4 text-[var(--text-muted)]", compact ? "text-xs" : "text-sm")}>{note.contentText || ""}</p>
               {note.reminderAt && (
                 <div className="mt-2 flex items-center gap-1 text-xs text-[var(--text-muted)]">
                   <Icon icon={Bell} size={12} weight="regular" />
                   <span>{new Date(note.reminderAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                 </div>
               )}
-            </div>
           </m.article>
         </ContextMenuTrigger>
         <ContextMenuContent>

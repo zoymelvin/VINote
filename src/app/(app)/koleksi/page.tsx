@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/icons";
 import { CollectionIcon } from "@/components/shared/collection-icon";
+import { CollectionDialog } from "@/components/shared/collection-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DotsThree, PencilSimple, Trash } from "@phosphor-icons/react";
 import * as m from "motion/react-m";
@@ -30,6 +31,7 @@ export default function KoleksiPage() {
   const [icon, setIcon] = useState("📁");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -56,13 +58,13 @@ export default function KoleksiPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <PageHeader title="Koleksi" description="Kelompokkan catatan Anda" actions={<Button onClick={() => setOpen(true)}><Icon icon={Plus} size={18} /> Koleksi baru</Button>} />
+      <PageHeader title="Koleksi" description="Kelompokkan catatan Anda" actions={<Button onClick={() => { setEditingId(null); setDialogOpen(true); }}><Icon icon={Plus} size={18} /> Koleksi baru</Button>} />
       {noCollection.length === 0 ? (
         <EmptyState
           icon={<CollectionIcon size={40} />}
           title="Belum ada koleksi"
           description="Buat koleksi pertama untuk mengorganisir catatan."
-          action={<Button onClick={() => setOpen(true)}><Icon icon={Plus} size={18} /> Buat koleksi</Button>}
+          action={<Button onClick={() => { setEditingId(null); setDialogOpen(true); }}><Icon icon={Plus} size={18} /> Buat koleksi</Button>}
         />
       ) : (
         <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.05 } } }} initial="hidden" animate="show" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -81,7 +83,7 @@ export default function KoleksiPage() {
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem icon={<Icon icon={PencilSimple} size={18} />} onSelect={() => setEditingId(c.id)}>Edit koleksi</DropdownMenuItem>
+                        <DropdownMenuItem icon={<Icon icon={PencilSimple} size={18} />} onSelect={() => { setEditingId(c.id); setDialogOpen(true); }}>Edit koleksi</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem icon={<Icon icon={Trash} size={18} />} onSelect={() => setDeleteId(c.id)} className="text-rose-600">Hapus koleksi</DropdownMenuItem>
                       </DropdownMenuContent>
@@ -97,20 +99,7 @@ export default function KoleksiPage() {
         </m.div>
       )}
 
-      <Dialog open={open} onClose={() => setOpen(false)} title="Koleksi baru">
-        <form onSubmit={submit} className="space-y-4">
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama koleksi" required />
-          <div className="flex flex-wrap gap-2">
-            {ICONS.map((e) => (
-              <button key={e} type="button" onClick={() => setIcon(e)} className={cn("text-2xl rounded-xl p-2 transition", icon === e ? "ring-2 ring-[var(--accent)] bg-[var(--card-muted)]" : "hover:bg-[var(--card-muted)]")}>{e}</button>
-            ))}
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={() => setOpen(false)}>Batal</Button>
-            <Button type="submit">Buat</Button>
-          </div>
-        </form>
-      </Dialog>
+      <CollectionDialog open={dialogOpen} onClose={() => { setDialogOpen(false); setEditingId(null); }} editingId={editingId} key={dialogOpen ? "open" : "closed"} />
 
       <Dialog open={!!editingId} onClose={() => setEditingId(null)} title="Edit koleksi">
         {editingId && (

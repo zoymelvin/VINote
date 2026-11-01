@@ -59,7 +59,7 @@ export default function Home() {
 
   async function quickNote() {
     const n = await import("@/lib/db/repo").then((m) => m.createNote({ type: "text", title: "" }));
-    router.push(`/catatan/${n.id}`);
+    router.push(`/catatan/${n.id}?mode=edit`);
   }
 
   const profile = useProfile();

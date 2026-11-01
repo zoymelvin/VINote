@@ -46,8 +46,44 @@ export function stripHtml(text: string) {
 export function getDisplayTitle(note: { title?: string | null; contentText?: string | null; type?: string | null }) {
   const title = note.title?.trim();
   if (title) return title;
-  const firstLine = (note.contentText || "").trim().split(/\r?\n/)[0]?.trim();
-  if (firstLine) return firstLine.slice(0, 80);
-  if (note.type?.trim()) return note.type.trim();
+  const raw = (note.contentText || "").trim();
+  if (raw) {
+    let line = raw.split(/\r?\n/)[0]?.trim() || "";
+    // strip markdown markers
+    line = line.replace(/^#+\s*/, "").replace(/^[-*>]+\s*/, "").replace(/^```+\s*/, "").trim();
+    line = line.replace(/\s+/g, " ");
+    if (line) return line.length > 80 ? line.slice(0, 80) + "…" : line;
+  }
+  // non-text content label
+  const typeLabels: Record<string, string> = {
+    checklist: "Checklist",
+    markdown: "Markdown",
+    code: "Kode",
+    quick: "Catatan Cepat",
+    journal: "Jurnal",
+    voice: "Suara",
+    drawing: "Sketsa",
+    bookmark: "Bookmark",
+    template: "Template",
+  };
+  if (note.type && typeLabels[note.type]) return typeLabels[note.type];
+  if (note.type && note.type !== "text") return note.type;
   return "Tanpa judul";
+}
+
+
+export function isEmptyNote(note: { title?: string | null; content?: unknown; contentText?: string | null }) {
+  const title = (note.title || "").trim();
+  if (title) return false;
+  const text = (note.contentText || "").trim();
+  if (text) return false;
+  // Check Tiptap empty doc
+  const content = note.content as { type?: string; content?: Array<{ type?: string; content?: unknown[] }> } | null;
+  if (content && content.type === "doc") {
+    const children = content.content || [];
+    if (children.length === 0) return true;
+    if (children.length === 1 && children[0].type === "paragraph" && (!children[0].content || children[0].content.length === 0)) return true;
+    if (children.every((c) => c.type === "paragraph" && (!c.content || c.content.length === 0))) return true;
+  }
+  return false;
 }

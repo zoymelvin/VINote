@@ -1,6 +1,6 @@
 import { db } from "@/lib/db/db";
 import type { Note, Collection, Tag, CardColor, Settings, NoteCollection, Backup } from "@/lib/notes/types";
-import { uid, now } from "@/lib/utils";
+import { uid, now, isEmptyNote } from "@/lib/utils";
 import { normalizeCardColor } from "@/lib/notes/types";
 import Fuse from "fuse.js";
 
@@ -148,14 +148,15 @@ export async function toggleFavoriteNote(id: string) {
 }
 
 export async function activeNotes() {
-  return db.notes.filter((n) => !n.deletedAt && !n.isArchived).toArray();
+  return db.notes.filter((n) => !n.deletedAt && !n.isArchived && !isEmptyNote(n)).toArray();
 }
 
-export async function listNotes(filter?: { includeDeleted?: boolean; archived?: boolean; collectionId?: string | null }) {
+export async function listNotes(filter?: { includeDeleted?: boolean; archived?: boolean; collectionId?: string | null; includeEmpty?: boolean }) {
   let all = await db.notes.toArray();
   if (!filter?.includeDeleted) all = all.filter((n) => !n.deletedAt);
   if (filter?.archived === true) all = all.filter((n) => n.isArchived);
   if (filter?.archived === false) all = all.filter((n) => !n.isArchived);
+  if (!filter?.includeEmpty) all = all.filter((n) => !isEmptyNote(n));
   if (filter?.collectionId !== undefined && filter.collectionId !== null) {
     const noteIds = new Set(
       (await db.noteCollections.where("collectionId").equals(filter.collectionId).filter((r) => !r.deletedAt).toArray()).map((r) => r.noteId)
@@ -170,7 +171,7 @@ export async function listNotes(filter?: { includeDeleted?: boolean; archived?: 
 }
 
 export async function listHistory() {
-  const all = await db.notes.filter((n) => !n.deletedAt && !n.isArchived && (n.historyHiddenAt == null || (n.lastOpenedAt ?? n.updatedAt) > (n.historyHiddenAt ?? 0))).toArray();
+  const all = await db.notes.filter((n) => !n.deletedAt && !n.isArchived && !isEmptyNote(n) && (n.historyHiddenAt == null || (n.lastOpenedAt ?? n.updatedAt) > (n.historyHiddenAt ?? 0))).toArray();
   return all.sort((a, b) => (b.lastOpenedAt ?? b.updatedAt) - (a.lastOpenedAt ?? a.updatedAt));
 }
 

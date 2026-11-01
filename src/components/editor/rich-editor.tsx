@@ -307,7 +307,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
         </div>
       )}
 
-      <div className={cn("mx-auto w-full px-4 md:px-12 py-6", isEditing ? "max-w-[1040px]" : "max-w-[68ch]")}>
+      <div className={cn("mx-auto w-full px-4 md:px-12 py-6", "max-w-[1040px]")}>
         {isEditing ? (
           <>
             <div className="mb-1">
