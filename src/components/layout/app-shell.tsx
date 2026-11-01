@@ -13,7 +13,7 @@ import { Avatar } from "@/components/shared/avatar";
 import { useProfile } from "@/stores/profile";
 import { CollectionIcon } from "@/components/shared/collection-icon";
 import { CollectionPickerProvider, useCollectionPicker } from "@/components/shared/collection-picker-provider";
-import { House, ClockCounterClockwise, Stack, GearSix, Archive, Trash, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
+import { PencilSimpleLine, House, ClockCounterClockwise, Stack, GearSix, Archive, Trash, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
 
 const tabs = [
@@ -133,70 +133,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 pb-28 md:pb-6 min-w-0 overflow-y-auto">{children}</main>
+      <main className="flex-1 pb-[calc(49px+env(safe-area-inset-bottom)+24px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
 
-      <nav className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-24px)] max-w-md -translate-x-1/2 md:hidden">
-        <div className="relative flex items-center justify-around rounded-[28px] border border-white/20 bg-[var(--card)]/75 px-2 py-2 shadow-[var(--shadow-2)] backdrop-blur-xl safe-bottom">
-          {tabs.slice(0, 2).map((t) => {
-            const active = path === t.href;
+      {path !== "/catatan" && !path.startsWith("/catatan/") && (
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <div className="flex items-center border-t border-[var(--border)] bg-[var(--card)]/90 backdrop-blur-xl" style={{ height: "49px" }}>
+          {tabs.map((t) => {
+            const active = path === t.href || (t.href !== "/" && path.startsWith(t.href));
             return (
-              <Link key={t.href} href={t.href} aria-label={t.label} className="relative flex h-12 w-12 items-center justify-center">
-                {active && (
-                  <m.div
-                    layoutId="bottom-tab-indicator"
-                    className="absolute inset-0 rounded-2xl bg-[var(--accent)]/15"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
-                <Icon icon={t.icon} size={24} weight="regular" className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
-              </Link>
-            );
-          })}
-
-          <div className="relative">
-            <button
-              onClick={() => setFabOpen((v) => !v)}
-              aria-label="Tulis catatan baru"
-              aria-expanded={fabOpen}
-              className="flex h-14 w-14 -translate-y-3 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[var(--shadow-2)] transition-transform active:scale-95"
-              style={{ transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)" }}
-            >
-              <Icon icon={Plus} size={24} weight="regular" />
-            </button>
-            {fabOpen && (
-              <div className="absolute bottom-16 left-1/2 z-50 w-52 -translate-x-1/2 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-[var(--shadow-2)] backdrop-blur">
-                {noteTypes.map((nt) => (
-                  <button
-                    key={nt.type}
-                    onClick={() => newNote(nt.type)}
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-                  >
-                    <Icon icon={nt.icon} size={18} weight="regular" className="text-[var(--text-muted)]" />
-                    <span>{nt.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {tabs.slice(3).map((t) => {
-            const active = path === t.href;
-            return (
-              <Link key={t.href} href={t.href} aria-label={t.label} className="relative flex h-12 w-12 items-center justify-center">
-                {active && (
-                  <m.div
-                    layoutId="bottom-tab-indicator"
-                    className="absolute inset-0 rounded-2xl bg-[var(--accent)]/15"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
-                <Icon icon={t.icon} size={24} weight="regular" className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
+              <Link
+                key={t.href}
+                href={t.href}
+                aria-label={t.label}
+                className="flex flex-1 flex-col items-center justify-center gap-0.5"
+                style={{ minHeight: "44px" }}
+              >
+                <Icon icon={t.icon} size={24} weight={active ? "fill" : "regular"} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
+                <span className={cn("text-[10.5px] leading-none", active ? "font-medium text-[var(--accent)]" : "text-[var(--text-muted)]")}>{t.label}</span>
               </Link>
             );
           })}
         </div>
       </nav>
+      )}
 
+      {path !== "/catatan" && !path.startsWith("/catatan/") && (
+        <button
+          onClick={() => newNote("text")}
+          aria-label="Catatan baru"
+          className="fixed z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg md:hidden"
+          style={{
+            right: "16px",
+            bottom: "calc(49px + env(safe-area-inset-bottom) + 16px)",
+            background: "linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 85%, black))",
+          }}
+        >
+          <Icon icon={PencilSimpleLine} size={24} weight="bold" />
+        </button>
+      )}
       <ToastHost />
     </div>
     </CollectionPickerProvider>
