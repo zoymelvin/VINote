@@ -154,7 +154,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
   });
 
   useEffect(() => {
-    if (editor && initialContent) {
+    if (editor && initialContent && !isEditingRef.current) {
       const currentContent = JSON.stringify(editor.getJSON());
       const newContent = JSON.stringify(initialContent);
       if (currentContent !== newContent) {
