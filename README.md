@@ -38,7 +38,8 @@ cp .env.example .env.local
 Isi nilai berikut (dari Supabase Dashboard > Settings > API):
 - `NEXT_PUBLIC_SUPABASE_URL` = Project URL (https://xxxxx.supabase.co)
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = anon/public key
-- `SUPABASE_SERVICE_ROLE_KEY` = service_role key (rahasia, jangan dibagikan)
+
+**Peringatan:** Jangan pernah memakai secret/service_role key di aplikasi ini. Aplikasi hanya memakai URL dan publishable (anon) key. Service role key memberikan akses penuh ke database dan tidak boleh ada di sisi klien.
 
 ### 5. Atur Auth
 1. Buka **Authentication > URL Configuration**.
@@ -65,7 +66,6 @@ Kode ini berlaku selama 1 jam.
 3. Set environment variables di Vercel Dashboard > Settings > Environment Variables:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY` (opsional)
 4. Deploy.
 
 ## Login di Laptop lalu iPhone

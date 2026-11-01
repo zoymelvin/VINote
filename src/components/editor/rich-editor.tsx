@@ -93,7 +93,14 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
             await updateNote(noteId, { title: titleRef.current.trim(), content: ed.getJSON(), contentText: text });
             setCreated(true);
           } else {
-            createNote({ id: noteId, type: "text", title: titleRef.current.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
+            try {
+              await createNote({ id: noteId, type: "text", title: titleRef.current.trim(), content: ed.getJSON(), contentText: text });
+              setCreated(true);
+            } catch {
+              // Race condition: note was created by another call, update instead
+              await updateNote(noteId, { title: titleRef.current.trim(), content: ed.getJSON(), contentText: text });
+              setCreated(true);
+            }
           }
         }
       }

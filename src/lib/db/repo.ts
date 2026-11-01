@@ -28,7 +28,7 @@ export async function createNote(input: Partial<Note> = {}): Promise<Note> {
     historyHiddenAt: null,
     version: input.version ?? 1,
   };
-  await db.notes.put(note);
+  await db.notes.add(note);
   if (input.folderId) {
     await addNoteToCollections(note.id, [input.folderId], note.userId);
   }
