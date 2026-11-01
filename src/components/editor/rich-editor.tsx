@@ -49,9 +49,12 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
   const isNewRef = useRef(isNew);
   const createdRef = useRef(created);
   const titleRef = useRef(title);
-  isNewRef.current = isNew;
-  createdRef.current = created;
-  titleRef.current = title;
+
+  useEffect(() => {
+    isNewRef.current = isNew;
+    createdRef.current = created;
+    titleRef.current = title;
+  });
   const collections = useLiveQuery(() => listCollections(), []);
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +91,10 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     },
   });
   const editorRef = useRef(editor);
-  editorRef.current = editor;
+
+  useEffect(() => {
+    editorRef.current = editor;
+  });
 
   useEffect(() => {
     if (editor && initialContent) {
