@@ -136,6 +136,7 @@ export async function activeNotes() {
 export async function listNotes(filter?: { includeDeleted?: boolean; archived?: boolean; collectionId?: string | null }) {
   let all = await db.notes.toArray();
   if (!filter?.includeDeleted) all = all.filter((n) => !n.deletedAt);
+  if (filter?.archived === true) all = all.filter((n) => n.isArchived);
   if (filter?.archived === false) all = all.filter((n) => !n.isArchived);
   if (filter?.collectionId !== undefined && filter.collectionId !== null) {
     const noteIds = new Set(
