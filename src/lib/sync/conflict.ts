@@ -10,6 +10,12 @@ export interface MergeResult {
 
 export function mergeNotes(local: Note | undefined, remote: Note): MergeResult {
   if (!local) return { action: "apply", note: remote };
+  // Don't overwrite local non-empty content with empty remote
+  const localHasContent = (local.contentText || "").trim().length > 0;
+  const remoteHasContent = (remote.contentText || "").trim().length > 0;
+  if (localHasContent && !remoteHasContent) {
+    return { action: "keep", note: local };
+  }
   if (remote.updatedAt > local.updatedAt) {
     return { action: "apply", note: remote, loser: local };
   }

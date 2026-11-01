@@ -20,28 +20,32 @@ export function createInMemoryAdapter(): RemoteAdapter {
   return new InMemoryAdapter();
 }
 
-function toLocal(row: Record<string, unknown>): Note {
+export function toLocal(row: Record<string, unknown>): Note {
   const str = (v: unknown) => (v == null ? null : String(v));
+  const contentObj = row.content ?? row.contentText ?? {};
+  const contentText =
+    row.contentText ??
+    (typeof contentObj === "string" ? contentObj : contentObj && typeof contentObj === "object" ? JSON.stringify(contentObj) : "");
   return {
-    id: String(row.id),
-    userId: str(row.user_id) ?? undefined,
+    id: String(row.id ?? row.id),
+    userId: str(row.user_id ?? row.userId) ?? undefined,
     type: String(row.type ?? "text") as Note["type"],
     title: String(row.title ?? ""),
-    content: row.content ?? {},
-    contentText: String(row.content_text ?? ""),
-    color: String(row.color ?? "polos") as Note["color"],
-    folderId: str(row.folder_id),
-    isPinned: Boolean(row.is_pinned),
-    isFavorite: Boolean(row.is_favorite),
-    isArchived: Boolean(row.is_archived),
-    isLocked: Boolean(row.is_locked),
-    reminderAt: row.reminder_at ? new Date(String(row.reminder_at)).getTime() : null,
-    sortOrder: Number(row.sort_order ?? 0),
-    createdAt: new Date(String(row.created_at)).getTime(),
-    updatedAt: new Date(String(row.updated_at)).getTime(),
-    deletedAt: row.deleted_at ? new Date(String(row.deleted_at)).getTime() : null,
-    lastOpenedAt: row.last_opened_at ? new Date(String(row.last_opened_at)).getTime() : null,
-    historyHiddenAt: row.history_hidden_at ? new Date(String(row.history_hidden_at)).getTime() : null,
+    content: contentObj ?? {},
+    contentText,
+    color: String(row.color ?? row.Color ?? "polos") as Note["color"],
+    folderId: str(row.folder_id ?? row.folderId),
+    isPinned: Boolean(row.is_pinned ?? row.isPinned),
+    isFavorite: Boolean(row.is_favorite ?? row.isFavorite),
+    isArchived: Boolean(row.is_archived ?? row.isArchived),
+    isLocked: Boolean(row.is_locked ?? row.isLocked),
+    reminderAt: row.reminder_at ?? row.reminderAt ? new Date(String(row.reminder_at ?? row.reminderAt)).getTime() : null,
+    sortOrder: Number(row.sort_order ?? row.sortOrder ?? 0),
+    createdAt: new Date(String(row.created_at ?? row.createdAt)).getTime(),
+    updatedAt: new Date(String(row.updated_at ?? row.updatedAt)).getTime(),
+    deletedAt: row.deleted_at ?? row.deletedAt ? new Date(String(row.deleted_at ?? row.deletedAt)).getTime() : null,
+    lastOpenedAt: row.last_opened_at ?? row.lastOpenedAt ? new Date(String(row.last_opened_at ?? row.lastOpenedAt)).getTime() : null,
+    historyHiddenAt: row.history_hidden_at ?? row.historyHiddenAt ? new Date(String(row.history_hidden_at ?? row.historyHiddenAt)).getTime() : null,
     version: Number(row.version ?? 1),
   };
 }
