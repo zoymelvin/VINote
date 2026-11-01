@@ -1,6 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/db";
-import { useEffect, useState } from "react";
 
 export interface Profile {
   displayName: string;
@@ -18,21 +17,7 @@ const DEFAULT_PROFILE: Profile = {
 
 export function useProfile(): Profile {
   const row = useLiveQuery(() => db.profiles.get("local"), []);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let url: string | null = null;
-    if (row?.avatarBlob) {
-      url = URL.createObjectURL(row.avatarBlob);
-      setAvatarUrl(url);
-    } else {
-      setAvatarUrl(row?.avatarUrl ?? null);
-    }
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [row?.avatarBlob, row?.avatarUrl]);
-
+  const avatarUrl = row?.avatarBlob ? URL.createObjectURL(row.avatarBlob) : (row?.avatarUrl ?? null);
   if (!row) {
     return { ...DEFAULT_PROFILE, avatarUrl };
   }

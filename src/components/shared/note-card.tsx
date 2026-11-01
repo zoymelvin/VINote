@@ -5,20 +5,19 @@ import { db } from "@/lib/db/db";
 import { softDeleteNote, togglePinNote, toggleFavoriteNote, duplicateNote, archiveNote, unarchiveNote } from "@/lib/db/repo";
 import { useToast } from "@/stores/toast";
 import { Icon } from "@/components/icons";
+import { openCollectionPicker } from "@/components/shared/collection-picker-provider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { cn, getDisplayTitle } from "@/lib/utils";
 import type { Note } from "@/lib/notes/types";
 import { useState, useRef } from "react";
 import * as m from "motion/react-m";
-import { CollectionPicker } from "@/components/shared/collection-picker";
 import { NoteTypeIcon } from "@/components/shared/note-type-icon";
 import { DotsThree, PushPin, Copy, Archive, Trash, FolderSimplePlus, Bell } from "@phosphor-icons/react";
 
 export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
   const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const touchStartX = useRef(0);
 
   async function remove() {
@@ -95,7 +94,7 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenuItem icon={<Icon icon={PushPin} size={18} />} onSelect={onPin}>{note.isPinned ? "Lepas sematan" : "Sematkan"}</DropdownMenuItem>
-                      <DropdownMenuItem icon={<Icon icon={FolderSimplePlus} size={18} />} onSelect={() => { setMenuOpen(false); setTimeout(() => setPickerOpen(true), 100); }}>Tambahkan ke Koleksi...</DropdownMenuItem>
+                      <DropdownMenuItem icon={<Icon icon={FolderSimplePlus} size={18} />} onSelect={() => { setMenuOpen(false); setTimeout(() => openCollectionPicker(note.id), 100); }}>Tambahkan ke Koleksi...</DropdownMenuItem>
                       <DropdownMenuItem icon={<Icon icon={Copy} size={18} />} onSelect={onDuplicate}>Duplikat</DropdownMenuItem>
                       <DropdownMenuItem icon={<Icon icon={Archive} size={18} />} onSelect={onArchive}>{note.isArchived ? "Keluarkan dari arsip" : "Arsipkan"}</DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -116,14 +115,13 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem onSelect={onPin}>{note.isPinned ? "Lepas sematan" : "Sematkan"}</ContextMenuItem>
-          <ContextMenuItem onSelect={() => { setMenuOpen(false); setTimeout(() => setPickerOpen(true), 100); }}>Tambahkan ke Koleksi...</ContextMenuItem>
+          <ContextMenuItem onSelect={() => { setMenuOpen(false); setTimeout(() => openCollectionPicker(note.id), 100); }}>Tambahkan ke Koleksi...</ContextMenuItem>
           <ContextMenuItem onSelect={onDuplicate}>Duplikat</ContextMenuItem>
           <ContextMenuItem onSelect={onArchive}>{note.isArchived ? "Keluarkan dari arsip" : "Arsipkan"}</ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem onSelect={remove} className="text-rose-600">Hapus</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
-      <CollectionPicker noteId={note.id} open={pickerOpen} onClose={() => setPickerOpen(false)} />
     </>
   );
 }

@@ -27,8 +27,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/icons";
-import { cn } from "@/lib/utils";
-import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter, Archive, Trash, FolderSimplePlus, ImageSquare } from "@phosphor-icons/react";
+import { cn, getDisplayTitle } from "@/lib/utils";
+import { CollectionPicker } from "@/components/shared/collection-picker";
+import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter, Archive, Trash, FolderSimplePlus, ImageSquare, PencilSimple, Check } from "@phosphor-icons/react";
 import type { Collection, Tag } from "@/lib/notes/types";
 
 const lowlight = createLowlight(common);
@@ -47,16 +48,27 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
   const [showReplace, setShowReplace] = useState(false);
   const [wordCount, setWordCount] = useState({ words: 0, chars: 0 });
   const [created, setCreated] = useState(false);
+  const [isEditing, setIsEditing] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'edit') return true;
+    }
+    return Boolean(isNew);
+  });
+  const [pickerOpen, setPickerOpen] = useState(false);
   const isNewRef = useRef(isNew);
   const createdRef = useRef(created);
+  const isEditingRef = useRef(isEditing);
   const titleRef = useRef(title);
 
   useEffect(() => {
     isNewRef.current = isNew;
     createdRef.current = created;
     titleRef.current = title;
+    isEditingRef.current = isEditing;
   });
   const collections = useLiveQuery(() => listCollections(), []);
+  const noteRow = useLiveQuery(() => db.notes.get(noteId), [noteId]);
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
@@ -98,12 +110,28 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
             }
           });
         }
-      } else {
+      } else if (isEditingRef.current) {
         scheduleSave();
       }
     },
   });
+  useEffect(() => {
+    if (!editor) return;
+    const text = editor.getText();
+    setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
+  }, [editor]);
+
+
+
+  useEffect(() => {
+    if (editor) editor.setEditable(isEditing);
+  }, [editor, isEditing]);
+
   const editorRef = useRef(editor);
+
+  useEffect(() => {
+    document.title = `${getDisplayTitle({ title, contentText: editor?.getText(), type: "text" })} · VINOTE`;
+  }, [title, editor]);
 
   useEffect(() => {
     editorRef.current = editor;
@@ -223,24 +251,39 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       <div className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/90 p-3 backdrop-blur">
         <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
-          <Button variant="ghost" size="sm" onClick={() => {}} title="Tambahkan ke koleksi"><Icon icon={FolderSimplePlus} size={16} />{collections?.length ? ` ${collections.length}` : ""}</Button>
+          <Button variant="ghost" size="sm" onClick={() => setPickerOpen(true)} title="Koleksi"><Icon icon={FolderSimplePlus} size={16} /></Button>
           <span className="text-sm text-[var(--text-muted)]">{saving ? "Menyimpan..." : "Tersimpan"}</span>
         </div>
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={() => router.push(`/catatan/${noteId}/versions`)} title="Riwayat versi"><Icon icon={ClockCounterClockwise} size={16} /></Button>
           <Button variant="ghost" size="sm" onClick={() => setFocusMode(true)} title="Mode fokus"><Icon icon={ArrowsOutSimple} size={16} /></Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" title="Lainnya"><Icon icon={List} size={16} /></Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => {}}>Bagikan</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {}}>Ekspor Markdown</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => window.print()}>Cetak</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setShowReplace(!showReplace)}>Cari & Ganti</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant={isEditing ? "primary" : "secondary"}
+            size="sm"
+            onClick={async () => {
+              if (isEditing) {
+                const ed = editorRef.current;
+                if (ed) {
+                  setSaving(true);
+                  const text = ed.getText();
+                  await updateNote(noteId, { title: titleRef.current, content: ed.getJSON(), contentText: text });
+                  setSaving(false);
+                }
+                setIsEditing(false);
+                const url = new URL(window.location.href);
+                url.searchParams.delete("mode");
+                window.history.replaceState(null, "", url.pathname + url.search);
+              } else {
+                setIsEditing(true);
+                const url = new URL(window.location.href);
+                url.searchParams.set("mode", "edit");
+                window.history.replaceState(null, "", url.pathname + url.search);
+              }
+            }}
+          >
+            <Icon icon={isEditing ? Check : PencilSimple} size={16} />
+            {isEditing ? "Selesai" : "Edit"}
+          </Button>
         </div>
       </div>
 
@@ -264,18 +307,33 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
         </div>
       )}
 
-      <div className="mx-auto w-full max-w-[1040px] px-4 md:px-12 py-6">
-        <div className="mb-1">
-          <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Judul</label>
-        </div>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="mb-4 w-full bg-transparent text-[36px] font-bold leading-tight outline-none text-[var(--text)] placeholder:text-[var(--text-muted)]"
-          placeholder="Judul catatan"
-          style={{ fontFamily: "var(--font-sans)" }}
-        />
-        <div className="mb-6 h-0.5 bg-[var(--accent)] transition-transform origin-left" style={{ transform: title ? "scaleX(1)" : "scaleX(0)" }} />
+      <div className={cn("mx-auto w-full px-4 md:px-12 py-6", isEditing ? "max-w-[1040px]" : "max-w-[68ch]")}>
+        {isEditing ? (
+          <>
+            <div className="mb-1">
+              <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Judul</label>
+            </div>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mb-4 w-full bg-transparent text-[36px] font-bold leading-tight outline-none text-[var(--text)] placeholder:text-[var(--text-muted)]"
+              placeholder="Judul catatan"
+              style={{ fontFamily: "var(--font-sans)" }}
+            />
+            <div className="mb-6 h-0.5 bg-[var(--accent)] transition-transform origin-left" style={{ transform: title ? "scaleX(1)" : "scaleX(0)" }} />
+          </>
+        ) : (
+          <div>
+            <h1 className="mb-2 text-[34px] font-bold leading-tight tracking-tight text-[var(--text)]">{title || getDisplayTitle({ title, contentText: editor?.getText(), type: "text" })}</h1>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
+              <span>{new Date(noteRow?.updatedAt ?? 0).toLocaleString("id-ID")}</span>
+              <span>·</span>
+              <span>{wordCount.words} kata</span>
+              <span>·</span>
+              <span>{Math.max(1, Math.ceil(wordCount.words / 200))} min baca</span>
+            </div>
+          </div>
+        )}
 
         <div className="mb-4 flex flex-wrap gap-2">
           {tags?.map((t) => (
@@ -283,6 +341,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
           ))}
         </div>
 
+        {isEditing && (
         <div className="mb-2 flex flex-wrap items-center gap-1 rounded-2xl bg-[var(--card)] p-1.5 shadow-[var(--shadow-1)]">
           <ToolbarGroup>
             <ToolbarBtn onClick={() => setHeading(1)} active={editor?.isActive("heading", { level: 1 })}><Icon icon={TextHOne} size={18} /></ToolbarBtn>
@@ -353,6 +412,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
           </ToolbarGroup>
         </div>
 
+        )}
         {showReplace && (
           <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl bg-[var(--card)] p-3">
             <Input placeholder="Cari" className="h-9 w-40" onChange={() => {}} />
@@ -369,6 +429,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
            <span>Estimasi {Math.max(1, Math.ceil(wordCount.words / 200))} min baca</span>
          </div>
        </div>
+      <CollectionPicker noteId={noteId} open={pickerOpen} onClose={() => setPickerOpen(false)} />
      </div>
      );
    }

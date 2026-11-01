@@ -7,20 +7,19 @@ import { db } from "@/lib/db/db";
 import { softDeleteNote, togglePinNote, duplicateNote, archiveNote, unarchiveNote } from "@/lib/db/repo";
 import { useToast } from "@/stores/toast";
 import { Icon } from "@/components/icons";
+import { openCollectionPicker } from "@/components/shared/collection-picker-provider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn, getDisplayTitle } from "@/lib/utils";
 import type { Note } from "@/lib/notes/types";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
 import { NoteTypeIcon } from "@/components/shared/note-type-icon";
-import { CollectionPicker } from "@/components/shared/collection-picker";
 import { DotsThree } from "@phosphor-icons/react";
 
 export function NoteRow({ note, onRemove, compact, archived }: { note: Note; onRemove?: () => void; compact?: boolean; archived?: boolean }) {
   const toast = useToast();
   const router = useRouter();
   const reduced = useReducedMotion();
-  const [pickerOpen, setPickerOpen] = useState(false);
 
   async function handleRemove() {
     await softDeleteNote(note.id);
@@ -82,14 +81,14 @@ export function NoteRow({ note, onRemove, compact, archived }: { note: Note; onR
             {archived ? (
               <>
                 <DropdownMenuItem onSelect={onUnarchive}>Keluarkan dari arsip</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => { setPickerOpen(true); }}>Tambahkan ke Koleksi...</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => { openCollectionPicker(note.id); }}>Tambahkan ke Koleksi...</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={handleRemove} className="text-rose-600">Hapus</DropdownMenuItem>
               </>
             ) : (
               <>
                 <DropdownMenuItem onSelect={onPin}>{note.isPinned ? "Lepas sematan" : "Sematkan"}</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => { setPickerOpen(true); }}>Tambahkan ke Koleksi...</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => { openCollectionPicker(note.id); }}>Tambahkan ke Koleksi...</DropdownMenuItem>
                 <DropdownMenuItem onSelect={onDuplicate}>Duplikat</DropdownMenuItem>
                 <DropdownMenuItem onSelect={onArchive}>{note.isArchived ? "Keluarkan dari arsip" : "Arsipkan"}</DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -100,7 +99,6 @@ export function NoteRow({ note, onRemove, compact, archived }: { note: Note; onR
         </DropdownMenu>
       </div>
     </m.div>
-      <CollectionPicker noteId={note.id} open={pickerOpen} onClose={() => setPickerOpen(false)} />
     </>
   );
 }

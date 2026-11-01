@@ -27,14 +27,14 @@ export default function KoleksiDetailPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  if (!collection) return <div className="p-4">Memuat...</div>;
-
   const filtered = useMemo(() => {
     const all = notes ?? [];
     if (!query.trim()) return all;
     const q = query.toLowerCase();
     return all.filter((n) => (n.title || "").toLowerCase().includes(q) || (n.contentText || "").toLowerCase().includes(q));
   }, [notes, query]);
+
+  if (!collection) return <div className="p-4">Memuat...</div>;
 
   async function saveName() {
     await updateCollection(id, { name: name.trim() || collection?.name || "Tanpa judul" });

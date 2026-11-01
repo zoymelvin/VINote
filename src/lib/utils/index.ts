@@ -42,3 +42,12 @@ export function formatDate(ts: number, locale = "id") {
 export function stripHtml(text: string) {
   return text.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
+
+export function getDisplayTitle(note: { title?: string | null; contentText?: string | null; type?: string | null }) {
+  const title = note.title?.trim();
+  if (title) return title;
+  const firstLine = (note.contentText || "").trim().split(/\r?\n/)[0]?.trim();
+  if (firstLine) return firstLine.slice(0, 80);
+  if (note.type?.trim()) return note.type.trim();
+  return "Tanpa judul";
+}

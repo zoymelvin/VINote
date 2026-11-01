@@ -12,6 +12,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Avatar } from "@/components/shared/avatar";
 import { useProfile } from "@/stores/profile";
 import { CollectionIcon } from "@/components/shared/collection-icon";
+import { CollectionPickerProvider, useCollectionPicker } from "@/components/shared/collection-picker-provider";
 import { House, ClockCounterClockwise, Stack, GearSix, Archive, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
 
@@ -67,6 +68,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const collapsibleCollections = useMemo(() => (collections ?? []).slice(0, 8), [collections]);
 
   return (
+    <CollectionPickerProvider>
     <div className="flex min-h-[100dvh] bg-[var(--background)]">
       <aside className={cn("hidden md:flex md:flex-col md:sticky md:top-0 md:h-[100dvh] md:border-r md:border-[var(--border)] md:p-4 md:transition-all md:overflow-y-auto", collapsed ? "md:w-20" : "md:w-64")}>
         <div className="mb-4 flex items-center justify-between">
@@ -212,5 +214,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <ToastHost />
     </div>
+    </CollectionPickerProvider>
   );
 }
