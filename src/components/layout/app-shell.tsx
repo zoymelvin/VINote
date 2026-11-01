@@ -12,6 +12,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Avatar } from "@/components/shared/avatar";
 import { useProfile } from "@/stores/profile";
 import { CollectionIcon } from "@/components/shared/collection-icon";
+import { MobileHeader } from "@/components/layout/mobile-header";
 import { CollectionPickerProvider, useCollectionPicker } from "@/components/shared/collection-picker-provider";
 import { PencilSimpleLine, House, ClockCounterClockwise, Stack, GearSix, Archive, Trash, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
@@ -141,6 +142,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
+      <MobileHeader />
       <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+64px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
 
       {path !== "/catatan" && !path.startsWith("/catatan/") && (

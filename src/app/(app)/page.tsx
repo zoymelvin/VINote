@@ -67,7 +67,7 @@ export default function Home() {
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8 space-y-8">
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur px-4 -mx-4 md:-mx-8 md:px-8">
+      <header className="sticky top-0 z-30 hidden h-16 items-center gap-3 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur px-4 -mx-4 md:flex md:-mx-8 md:px-8">
         <button
           onClick={() => setPaletteOpen(true)}
           className="flex h-11 flex-1 max-w-[640px] items-center gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--card)] px-4 text-left text-[var(--text-muted)] transition hover:border-[var(--accent)]"
