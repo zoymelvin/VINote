@@ -143,16 +143,17 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
 
   useEffect(() => {
     const flush = () => {
-      if (editor) {
-        const text = editor.getText();
-        updateNote(noteId, { title, content: editor.getJSON(), contentText: text });
+      const ed = editorRef.current;
+      if (ed) {
+        const text = ed.getText();
+        updateNote(noteId, { title: titleRef.current, content: ed.getJSON(), contentText: text });
       }
     };
     setupFlushHandlers(flush);
     return () => {
       flush();
     };
-  }, [editor, title, noteId]);
+  }, [editor, noteId]);
 
   useEffect(() => {
     if (isNew && !created) return;
@@ -160,7 +161,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       if (!editor) return;
       setSaving(true);
       const text = editor.getText();
-      await updateNote(noteId, { title, content: editor.getJSON(), contentText: text });
+      await updateNote(noteId, { title: titleRef.current, content: editor.getJSON(), contentText: text });
       setSaving(false);
     }, 800);
     return () => clearTimeout(t);
