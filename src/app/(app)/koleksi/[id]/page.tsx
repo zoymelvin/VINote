@@ -32,7 +32,7 @@ export default function KoleksiDetailPage() {
   }
 
   async function addNoteHere() {
-    const n = await createNote({ type: "text", title: "" });
+    const n = await createNote({ type: "text", title: "", folderId: id });
     router.push(`/catatan/${n.id}`);
   }
 
