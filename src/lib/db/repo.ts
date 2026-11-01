@@ -132,6 +132,8 @@ export async function toggleFavoriteNote(id: string) {
 export async function activeNotes() {
   return db.notes.filter((n) => !n.deletedAt && !n.isArchived).toArray();
 }
+
+export async function listNotes(filter?: { includeDeleted?: boolean; archived?: boolean; collectionId?: string | null }) {
   let all = await db.notes.toArray();
   if (!filter?.includeDeleted) all = all.filter((n) => !n.deletedAt);
   if (filter?.archived === false) all = all.filter((n) => !n.isArchived);
