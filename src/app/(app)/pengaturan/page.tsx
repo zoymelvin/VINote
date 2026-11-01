@@ -17,6 +17,7 @@ import { ACCENT_LABEL, THEME_LABEL } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/stores/profile";
 import { db } from "@/lib/db/db";
+import { createBackup, listBackups, restoreBackup, listUnsyncedNotes } from "@/lib/db/repo";
 
 const ACCENTS = [
   { id: "indigo", color: "#6366f1" },
@@ -40,13 +41,15 @@ export default function PengaturanPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [username, setUsername] = useState(profile.username);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatarUrl);
+  const [backups, setBackups] = useState<Awaited<ReturnType<typeof listBackups>>>([]);
+  const [unsynced, setUnsynced] = useState<Awaited<ReturnType<typeof listUnsyncedNotes>>>([]);
+  const [backupOpen, setBackupOpen] = useState(false);
+  const [unsyncedOpen, setUnsyncedOpen] = useState(false);
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setAvatarFile(file);
     const url = URL.createObjectURL(file);
     setAvatarPreview(url);
   }
@@ -67,6 +70,31 @@ export default function PengaturanPage() {
     if (!supabase) return;
     await supabase.auth.signOut();
     router.push("/login");
+  }
+
+  async function loadBackups() {
+    setBackups(await listBackups());
+  }
+
+  async function loadUnsynced() {
+    setUnsynced(await listUnsyncedNotes());
+  }
+
+  async function handleCreateBackup() {
+    await createBackup();
+    await loadBackups();
+  }
+
+  async function handleRestoreBackup(id: string) {
+    const count = await restoreBackup(id);
+    alert(`Dipulihkan ${count} catatan`);
+    setBackupOpen(false);
+  }
+
+  async function handleUploadUnsynced() {
+    const { processOutbox } = await import("@/lib/sync/engine");
+    await processOutbox();
+    await loadUnsynced();
   }
 
   return (
@@ -110,12 +138,21 @@ export default function PengaturanPage() {
         <SettingsRow icon={<Icon icon={Download} size={20} />} label="Ekspor data" description="Simpan cadangan catatan">
           <Button size="sm" variant="secondary">Ekspor</Button>
         </SettingsRow>
+        <SettingsRow icon={<Icon icon={Download} size={20} />} label="Pulihkan dari cadangan lokal" description="Daftar cadangan yang tersimpan">
+          <Button size="sm" variant="secondary" onClick={() => { loadBackups(); setBackupOpen(true); }}>Buka</Button>
+        </SettingsRow>
+        <SettingsRow icon={<Icon icon={Download} size={20} />} label="Periksa catatan yang belum tersinkron" description="Daftar catatan lokal/gagal">
+          <Button size="sm" variant="secondary" onClick={() => { loadUnsynced(); setUnsyncedOpen(true); }}>Buka</Button>
+        </SettingsRow>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-muted)]">Bantuan</h2>
         <SettingsRow icon={<Icon icon={Question} size={20} />} label="Pintasan keyboard" description="Lihat daftar pintasan">
           <Button size="sm" variant="ghost">Lihat</Button>
+        </SettingsRow>
+        <SettingsRow icon={<Icon icon={Question} size={20} />} label="Diagnostik sinkron" description="Periksa koneksi server">
+          <Button size="sm" variant="ghost" onClick={() => router.push("/pengaturan/diagnostik")}>Buka</Button>
         </SettingsRow>
       </section>
 
@@ -138,7 +175,7 @@ export default function PengaturanPage() {
               </label>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="secondary" onClick={() => { setAvatarPreview(null); setAvatarFile(null); }}>Hapus foto</Button>
+              <Button size="sm" variant="secondary" onClick={() => { setAvatarPreview(null); }}>Hapus foto</Button>
             </div>
           </div>
           <Field label="Nama tampilan">
@@ -154,6 +191,46 @@ export default function PengaturanPage() {
             <Button type="button" variant="secondary" onClick={() => setEditOpen(false)}>Batal</Button>
             <Button type="button" onClick={saveProfile}>Simpan</Button>
           </div>
+        </div>
+      </Dialog>
+
+      <Dialog open={backupOpen} onClose={() => setBackupOpen(false)} title="Pulihkan dari cadangan lokal">
+        <div className="space-y-4">
+          <Button size="sm" onClick={handleCreateBackup}>Buat cadangan baru</Button>
+          {backups.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)]">Belum ada cadangan.</p>
+          ) : (
+            <div className="space-y-2">
+              {backups.map((b) => (
+                <div key={b.id} className="flex items-center justify-between rounded-xl bg-[var(--card-muted)] p-3">
+                  <div>
+                    <div className="text-sm font-medium">{new Date(b.createdAt).toLocaleString("id-ID")}</div>
+                    <div className="text-xs text-[var(--text-muted)]">{(b.size / 1024).toFixed(1)} KB</div>
+                  </div>
+                  <Button size="sm" variant="secondary" onClick={() => handleRestoreBackup(b.id)}>Pulihkan</Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Dialog>
+
+      <Dialog open={unsyncedOpen} onClose={() => setUnsyncedOpen(false)} title="Catatan yang belum tersinkron">
+        <div className="space-y-4">
+          {unsynced.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)]">Semua catatan sudah tersinkron.</p>
+          ) : (
+            <>
+              <div className="space-y-2 max-h-[40vh] overflow-y-auto">
+                {unsynced.map((n) => (
+                  <div key={n.id} className="flex items-center justify-between rounded-xl bg-[var(--card-muted)] p-3">
+                    <div className="text-sm">{n.title || "Tanpa judul"}</div>
+                  </div>
+                ))}
+              </div>
+              <Button size="sm" onClick={handleUploadUnsynced}>Unggah semua</Button>
+            </>
+          )}
         </div>
       </Dialog>
     </div>

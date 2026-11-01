@@ -3,8 +3,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
-import { Icon } from "@/components/icons";
-import { Check, X, MagnifyingGlass } from "@phosphor-icons/react";
+import { Check, X } from "@phosphor-icons/react";
 import { db } from "@/lib/db/db";
 import { processOutbox, pullNotes } from "@/lib/sync/engine";
 
@@ -69,8 +68,8 @@ export default function DiagnostikPage() {
 
     // Step 5: Storage
     if (supabase) {
-      const { data, error } = await supabase.storage.listBuckets();
-      res.push({ step: "Storage", ok: !error, message: error ? error.message : `Bucket: ${data?.map((b) => b.name).join(", ")}` });
+      const { error } = await supabase.storage.listBuckets();
+      res.push({ step: "Storage", ok: !error, message: error ? error.message : "Storage tersedia" });
     }
 
     // Step 6: Local vs server count
