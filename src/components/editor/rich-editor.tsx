@@ -98,7 +98,10 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     },
     onUpdate: ({ editor: ed }) => {
       const text = ed.getText();
-      setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
+      if (wordCountTimerRef.current) clearTimeout(wordCountTimerRef.current);
+      wordCountTimerRef.current = setTimeout(() => {
+        setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
+      }, 120);
       if (isNewRef.current && !createdRef.current) {
         const hasContent = text.trim().length > 0 || titleRef.current.trim().length > 0;
         if (hasContent) {
@@ -188,6 +191,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
   }, [editor, noteId]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wordCountTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scheduleSave = useCallback(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -204,6 +208,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (wordCountTimerRef.current) clearTimeout(wordCountTimerRef.current);
     };
   }, []);
 
