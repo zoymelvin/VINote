@@ -73,8 +73,13 @@ export async function processOutbox(adapter?: RemoteAdapter | null, onProgress?:
       if (elapsed < backoff) continue;
     }
     try {
+      const payload = { ...(item.payload as Record<string, unknown>) };
+      // Ensure user_id is set (will be validated by RLS)
+      if (!payload.user_id && item.table !== "note_tags") {
+        // user_id will be set by Supabase via auth.uid() default
+      }
       if (item.op === "upsert") {
-        const result = await a.pushChanges(item.table, [item.payload as Record<string, unknown>]);
+        const result = await a.pushChanges(item.table, [payload]);
         if (!result.ok) throw new Error(result.error || "Push failed");
         if (result.serverRows?.[0]) {
           const serverRow = result.serverRows[0];
@@ -170,8 +175,75 @@ export async function pullNotes(adapter?: RemoteAdapter | null, userId?: string,
 }
 
 export async function syncAll(userId?: string, onProgress?: (status: string) => void) {
-  await processOutbox(null, onProgress);
-  await pullNotes(null, userId, onProgress);
+  const supabase = createClient();
+  if (!supabase) {
+    onProgress?.("offline");
+    return;
+  }
+  const { data: { session } } = await supabase.auth.getSession();
+  const effectiveUserId = session?.user.id ?? userId;
+
+  // Push outbox for all entities
+  await processOutbox(undefined, onProgress);
+
+  // Pull from server for each entity
+  await pullNotes(undefined, effectiveUserId, onProgress);
+  await pullFromTable("folders", effectiveUserId, onProgress);
+  await pullFromTable("note_collections", effectiveUserId, onProgress);
+  await pullFromTable("profiles", effectiveUserId, onProgress);
+  await pullFromTable("settings", effectiveUserId, onProgress);
+  await pullFromTable("note_revisions", effectiveUserId, onProgress);
+}
+
+export async function pullFromTable(table: string, userId?: string, onProgress?: (status: string) => void) {
+  const a = getAdapter();
+  if (!a) {
+    onProgress?.("offline");
+    return;
+  }
+  const dexieTable: Record<string, { get: (id: string | [string, string]) => Promise<unknown | undefined>; put: (val: unknown) => Promise<unknown> }> = {
+    notes: db.notes as unknown as { get: (id: string | [string, string]) => Promise<unknown | undefined>; put: (val: unknown) => Promise<unknown> },
+    folders: db.folders as unknown as { get: (id: string | [string, string]) => Promise<unknown | undefined>; put: (val: unknown) => Promise<unknown> },
+    note_collections: db.noteCollections as unknown as { get: (id: string | [string, string]) => Promise<unknown | undefined>; put: (val: unknown) => Promise<unknown> },
+    profiles: db.settings as unknown as { get: (id: string | [string, string]) => Promise<unknown | undefined>; put: (val: unknown) => Promise<unknown> },
+    settings: db.settings as unknown as { get: (id: string | [string, string]) => Promise<unknown | undefined>; put: (val: unknown) => Promise<unknown> },
+    note_revisions: db.revisions as unknown as { get: (id: string | [string, string]) => Promise<unknown | undefined>; put: (val: unknown) => Promise<unknown> },
+  };
+  const tableRef = dexieTable[table];
+  if (!tableRef) return;
+  try {
+    const cursor = await getLastSync();
+    const cursorStr = cursor ? new Date(cursor).toISOString() : null;
+    const change = await a.pullSince(table, cursorStr);
+    for (const row of change.rows) {
+      const localNote = toLocal(row);
+      const existing = (await tableRef.get(localNote.id)) as Note | undefined;
+      const hasPending = await db.outbox.where("table").equals(table).filter((item) => {
+        const payload = item.payload as Record<string, unknown>;
+        return payload?.id === localNote.id;
+      }).count();
+      if (hasPending > 0) continue;
+      if (existing && existing.updatedAt > localNote.updatedAt) {
+        await db.revisions.add({
+          id: uid(),
+          noteId: localNote.id,
+          userId: existing.userId,
+          title: localNote.title,
+          content: localNote.content,
+          createdAt: now(),
+        });
+        continue;
+      }
+      await tableRef.put(localNote);
+    }
+    if (change.cursor) {
+      await setLastSync(new Date(change.cursor).getTime());
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`Pull ${table} failed:`, msg);
+    onProgress?.("failed");
+  }
 }
 
 export function subscribeRealtime(userId: string, onChange: (note: Note) => void) {
