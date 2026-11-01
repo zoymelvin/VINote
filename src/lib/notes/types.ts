@@ -164,6 +164,18 @@ export interface Backup {
   size: number;
 }
 
+
+export interface ProfileRecord {
+  id: string;
+  userId?: string;
+  displayName: string;
+  username: string;
+  email: string;
+  avatarBlob: Blob | null;
+  avatarUrl: string | null;
+  updatedAt: number;
+}
+
 export function normalizeCardColor(color: string | undefined): CardColor {
   const legacy: Record<string, CardColor> = {
     neutral: "polos",

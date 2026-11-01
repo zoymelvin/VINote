@@ -1,6 +1,6 @@
-import { create } from "zustand";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/db";
+import { useEffect, useState } from "react";
 
 export interface Profile {
   displayName: string;
@@ -17,13 +17,33 @@ const DEFAULT_PROFILE: Profile = {
 };
 
 export function useProfile(): Profile {
-  const settings = useLiveQuery(() => db.settings.toArray().then((s) => s[0]), []);
-  const meta = useLiveQuery(() => db.meta.where("key").equals("profile").first(), []);
-  const profile = (meta?.value as Profile) ?? DEFAULT_PROFILE;
+  const row = useLiveQuery(() => db.profiles.get("local"), []);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let url: string | null = null;
+    if (row?.avatarBlob) {
+      url = URL.createObjectURL(row.avatarBlob);
+      setAvatarUrl(url);
+    } else {
+      setAvatarUrl(row?.avatarUrl ?? null);
+    }
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [row?.avatarBlob, row?.avatarUrl]);
+
+  if (!row) {
+    return { ...DEFAULT_PROFILE, avatarUrl };
+  }
   return {
-    displayName: profile.displayName || DEFAULT_PROFILE.displayName,
-    username: profile.username || DEFAULT_PROFILE.username,
-    email: profile.email || DEFAULT_PROFILE.email,
-    avatarUrl: profile.avatarUrl ?? null,
+    displayName: row.displayName || DEFAULT_PROFILE.displayName,
+    username: row.username || DEFAULT_PROFILE.username,
+    email: row.email || DEFAULT_PROFILE.email,
+    avatarUrl,
   };
+}
+
+export async function getProfileRecord() {
+  return db.profiles.get("local");
 }

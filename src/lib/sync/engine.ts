@@ -190,7 +190,7 @@ export async function syncAll(userId?: string, onProgress?: (status: string) => 
   await pullNotes(undefined, effectiveUserId, onProgress);
   await pullFromTable("folders", effectiveUserId, onProgress);
   await pullFromTable("note_collections", effectiveUserId, onProgress);
-  await pullFromTable("profiles", effectiveUserId, onProgress);
+  await pullProfile(undefined, effectiveUserId, onProgress);
   await pullFromTable("settings", effectiveUserId, onProgress);
   await pullFromTable("note_revisions", effectiveUserId, onProgress);
 }
@@ -242,6 +242,57 @@ export async function pullFromTable(table: string, userId?: string, onProgress?:
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error(`Pull ${table} failed:`, msg);
+    onProgress?.("failed");
+  }
+}
+
+
+export async function pullProfile(adapter?: RemoteAdapter | null, userId?: string, onProgress?: (status: string) => void) {
+  const a = adapter ?? getAdapter();
+  if (!a) {
+    onProgress?.("offline");
+    return;
+  }
+  onProgress?.("syncing");
+  try {
+    const change = await a.pullSince("profiles", null);
+    for (const row of change.rows) {
+      const rowUserId = row.user_id ?? row.userId;
+      if (userId && rowUserId && String(rowUserId) !== String(userId)) continue;
+
+      const local = await db.profiles.get("local");
+      const hasPending = await db.outbox.where("table").equals("profiles").count();
+      if (hasPending > 0) continue;
+
+      const serverAvatar = row.avatar_url ?? row.avatarUrl;
+      let avatarBlob = local?.avatarBlob ?? null;
+      let avatarUrl = local?.avatarUrl ?? null;
+      if (serverAvatar) {
+        avatarUrl = String(serverAvatar);
+        const client = createClient();
+        if (client && typeof serverAvatar === "string" && !serverAvatar.startsWith("http")) {
+          const { data, error } = await client.storage.from("avatars").download(serverAvatar);
+          if (!error && data) avatarBlob = data;
+        } else if (serverAvatar instanceof Blob) {
+          avatarBlob = serverAvatar;
+        }
+      }
+
+      await db.profiles.put({
+        id: "local",
+        userId: userId ?? local?.userId,
+        displayName: String(row.display_name ?? row.displayName ?? local?.displayName ?? "zoymelvin"),
+        username: String(row.username ?? local?.username ?? "zoymelvin"),
+        email: String(row.email ?? local?.email ?? ""),
+        avatarBlob,
+        avatarUrl,
+        updatedAt: row.updated_at ?? row.updatedAt ? new Date(String(row.updated_at ?? row.updatedAt)).getTime() : Date.now(),
+      });
+    }
+    onProgress?.("synced");
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("Pull profile failed:", msg);
     onProgress?.("failed");
   }
 }

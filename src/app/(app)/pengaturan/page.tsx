@@ -42,26 +42,84 @@ export default function PengaturanPage() {
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [username, setUsername] = useState(profile.username);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatarUrl);
+  const [avatarBlob, setAvatarBlob] = useState<Blob | null>(null);
   const [backups, setBackups] = useState<Awaited<ReturnType<typeof listBackups>>>([]);
   const [unsynced, setUnsynced] = useState<Awaited<ReturnType<typeof listUnsyncedNotes>>>([]);
   const [backupOpen, setBackupOpen] = useState(false);
   const [unsyncedOpen, setUnsyncedOpen] = useState(false);
 
+  async function resizeToJpeg(file: File): Promise<Blob> {
+    const img = await createImageBitmap(file);
+    const size = 512;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("no canvas");
+    const scale = Math.max(size / img.width, size / img.height);
+    const w = img.width * scale;
+    const h = img.height * scale;
+    ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/jpeg", 0.85);
+    });
+  }
+
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setAvatarPreview(url);
+    try {
+      const blob = await resizeToJpeg(file);
+      const url = URL.createObjectURL(blob);
+      setAvatarBlob(blob);
+      setAvatarPreview(url);
+    } catch {
+      const url = URL.createObjectURL(file);
+      setAvatarBlob(file);
+      setAvatarPreview(url);
+    }
   }
 
   async function saveProfile() {
-    const updated = {
+    const current = await db.profiles.get("local");
+    const userId = current?.userId;
+    const updatedAvatarUrl = avatarPreview && avatarBlob ? (userId ? `${userId}/avatar.jpg` : current?.avatarUrl ?? null) : (avatarPreview ? current?.avatarUrl ?? null : null);
+    await db.profiles.put({
+      id: "local",
+      userId,
       displayName: displayName.trim() || profile.displayName,
       username: username.trim() || profile.username,
       email: profile.email,
-      avatarUrl: avatarPreview,
-    };
-    await db.meta.put({ key: "profile", value: updated });
+      avatarBlob: avatarBlob ?? current?.avatarBlob ?? null,
+      avatarUrl: avatarBlob ? updatedAvatarUrl : (avatarPreview ? current?.avatarUrl ?? null : null),
+      updatedAt: Date.now(),
+    });
+
+    // Upload to avatars bucket when possible; enqueue outbox on failure.
+    if (avatarBlob && userId) {
+      const client = createClient();
+      if (client) {
+        const path = `${userId}/avatar.jpg`;
+        const { error } = await client.storage.from("avatars").upload(path, avatarBlob, { upsert: true, contentType: "image/jpeg" });
+        if (error) {
+          const { enqueue } = await import("@/lib/sync/engine");
+          await enqueue("profiles", "upsert", { id: userId, user_id: userId, display_name: displayName.trim() || profile.displayName, username: username.trim() || profile.username, email: profile.email, avatar_url: path, updated_at: new Date().toISOString() });
+        } else {
+          const { processOutbox } = await import("@/lib/sync/engine");
+          await db.profiles.put({ id: "local", userId, displayName: displayName.trim() || profile.displayName, username: username.trim() || profile.username, email: profile.email, avatarBlob, avatarUrl: path, updatedAt: Date.now() });
+          const { enqueue } = await import("@/lib/sync/engine");
+          await enqueue("profiles", "upsert", { id: userId, user_id: userId, display_name: displayName.trim() || profile.displayName, username: username.trim() || profile.username, email: profile.email, avatar_url: path, updated_at: new Date().toISOString() });
+          await processOutbox();
+        }
+      } else {
+        const { enqueue } = await import("@/lib/sync/engine");
+        await enqueue("profiles", "upsert", { id: userId ?? "local", user_id: userId, display_name: displayName.trim() || profile.displayName, username: username.trim() || profile.username, email: profile.email, avatar_url: avatarPreview, updated_at: new Date().toISOString() });
+      }
+    } else {
+      const { enqueue } = await import("@/lib/sync/engine");
+      await enqueue("profiles", "upsert", { id: userId ?? "local", user_id: userId, display_name: displayName.trim() || profile.displayName, username: username.trim() || profile.username, email: profile.email, avatar_url: avatarPreview, updated_at: new Date().toISOString() });
+    }
+
     setEditOpen(false);
   }
 
@@ -167,7 +225,7 @@ export default function PengaturanPage() {
               </label>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="secondary" onClick={() => { setAvatarPreview(null); }}>Hapus foto</Button>
+              <Button size="sm" variant="secondary" onClick={() => { setAvatarPreview(null); setAvatarBlob(null); }}>Hapus foto</Button>
             </div>
           </div>
           <Field label="Nama tampilan">

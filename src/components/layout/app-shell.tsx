@@ -9,6 +9,9 @@ import { createNote, listCollections } from "@/lib/db/repo";
 import type { Collection, Note } from "@/lib/notes/types";
 import * as m from "motion/react-m";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Avatar } from "@/components/shared/avatar";
+import { useProfile } from "@/stores/profile";
+import { CollectionIcon } from "@/components/shared/collection-icon";
 import { House, ClockCounterClockwise, Stack, GearSix, Archive, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
 
@@ -52,6 +55,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const collections = useLiveQuery(() => listCollections(), []);
+  const profile = useProfile();
+  const initial = profile.displayName.charAt(0).toUpperCase();
 
   async function newNote(type: string) {
     const n = await createNote({ type: type as Note["type"], title: "" });
@@ -120,7 +125,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     href={`/koleksi/${c.id}`}
                     className={cn("flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm transition", active ? "bg-[var(--card-muted)] font-medium" : "text-[var(--text-muted)] hover:bg-[var(--card-muted)]/60")}
                   >
-                    <IconTile icon={IconComp} gradient={gradient} />
+                    <CollectionIcon icon={c.icon} color={c.color} size={24} />
                     <span className="truncate">{c.name}</span>
                   </Link>
                 );
@@ -130,10 +135,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
         <div className="mt-auto pt-4">
           <div className="flex items-center gap-3 rounded-2xl bg-[var(--card-muted)] p-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">Z</div>
+            <Avatar src={profile.avatarUrl ?? undefined} alt={profile.displayName} initials={initial} size={36} />
             {!collapsed && (
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium">zoymelvin</div>
+                <div className="truncate text-sm font-medium">{profile.displayName}</div>
                 <div className="truncate text-xs text-[var(--text-muted)]">Tersinkron</div>
               </div>
             )}

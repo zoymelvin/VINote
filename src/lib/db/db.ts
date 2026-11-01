@@ -12,6 +12,7 @@ import type {
   OutboxItem,
   NoteCollection,
   Backup,
+  ProfileRecord,
 } from "@/lib/notes/types";
 
 export class VinoteDB extends Dexie {
@@ -28,6 +29,7 @@ export class VinoteDB extends Dexie {
   meta!: Table<{ key: string; value: unknown }, string>;
   noteCollections!: Table<NoteCollection, [string, string]>;
   backups!: Table<Backup, string>;
+  profiles!: Table<ProfileRecord, string>;
 
   constructor() {
     super("vinote");
@@ -98,6 +100,33 @@ export class VinoteDB extends Dexie {
     });
     this.version(4).stores({
       backups: "id, createdAt",
+    });
+    this.version(5).stores({
+      profiles: "id, userId, updatedAt",
+    }).upgrade((tx) => {
+      return tx.table("meta").get("profile").then((meta) => {
+        const p = (meta?.value as { displayName?: string; username?: string; email?: string; avatarUrl?: string | null } | undefined) ?? {};
+        return tx.table("profiles").put({
+          id: "local",
+          userId: undefined,
+          displayName: p.displayName || "zoymelvin",
+          username: p.username || "zoymelvin",
+          email: p.email || "zoymelvin@email.com",
+          avatarBlob: null,
+          avatarUrl: p.avatarUrl ?? null,
+          updatedAt: Date.now(),
+        });
+      }).catch(() => {
+        return tx.table("profiles").put({
+          id: "local",
+          displayName: "zoymelvin",
+          username: "zoymelvin",
+          email: "zoymelvin@email.com",
+          avatarBlob: null,
+          avatarUrl: null,
+          updatedAt: Date.now(),
+        });
+      });
     });
   }
 }
