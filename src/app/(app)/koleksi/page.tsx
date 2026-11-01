@@ -1,6 +1,6 @@
 "use client";
 import { useLiveQuery } from "dexie-react-hooks";
-import { listCollections, createCollection, updateCollection, softDeleteCollection } from "@/lib/db/repo";
+import { listCollections, createCollection, updateCollection, softDeleteCollection, countByCollection } from "@/lib/db/repo";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Plus } from "@phosphor-icons/react";
@@ -22,6 +22,7 @@ const ICONS = ["📁", "💼", "🏠", "💡", "🎨", "📚", "🎯", "✈️",
 
 export default function KoleksiPage() {
   const collections = useLiveQuery(() => listCollections(), []);
+  const counts = useLiveQuery(() => countByCollection(), []);
   const router = useRouter();
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -67,12 +68,13 @@ export default function KoleksiPage() {
         <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.05 } } }} initial="hidden" animate="show" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {noCollection.map((c) => (
             <m.div key={c.id} variants={{ hidden: { opacity: 0, y: reduced ? 0 : 8 }, show: { opacity: 1, y: 0 } }}>
-              <div className="group relative rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-1)] transition-transform [@media(hover:hover)]:hover:-translate-y-[1px]">
-                <Link href={`/koleksi/${c.id}`} className="absolute inset-0 z-0" />
-                <div className="relative z-[1]">
+              <div className="group relative cursor-pointer rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-1)] transition-transform [@media(hover:hover)]:hover:-translate-y-[1px]">
+                <Link href={`/koleksi/${c.id}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={`Buka koleksi: ${c.name}`} />
+                <div className="relative z-[1] pointer-events-none">
                   <div className="mb-3 flex items-start justify-between">
                     <CollectionIcon icon={c.icon} color={c.color} size={40} />
-                    <DropdownMenu>
+                    <div className="pointer-events-auto relative z-[2]">
+                      <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="flex h-9 w-9 items-center justify-center rounded-xl opacity-0 transition-opacity group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
                           <Icon icon={DotsThree} size={18} weight="bold" />
@@ -84,9 +86,10 @@ export default function KoleksiPage() {
                         <DropdownMenuItem icon={<Icon icon={Trash} size={18} />} onSelect={() => setDeleteId(c.id)} className="text-rose-600">Hapus koleksi</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    </div>
                   </div>
                   <div className="font-semibold">{c.name}</div>
-                  <div className="text-xs text-[var(--text-muted)]">{c.description || "Koleksi"}</div>
+                  <div className="text-xs text-[var(--text-muted)]">{counts?.[c.id] ?? 0} catatan</div>
                 </div>
               </div>
             </m.div>

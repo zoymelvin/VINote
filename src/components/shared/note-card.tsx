@@ -7,7 +7,7 @@ import { useToast } from "@/stores/toast";
 import { Icon } from "@/components/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu";
-import { cn } from "@/lib/utils";
+import { cn, getDisplayTitle } from "@/lib/utils";
 import type { Note } from "@/lib/notes/types";
 import { useState, useRef } from "react";
 import * as m from "motion/react-m";
@@ -67,19 +67,19 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
             layoutId={`note-${note.id}`}
             whileTap={{ scale: 0.985 }}
             className={cn(
-              "group relative rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-1)] transition-transform [@media(hover:hover)]:hover:-translate-y-[1px]",
+              "group relative cursor-pointer rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-1)] transition-transform [@media(hover:hover)]:hover:-translate-y-[1px]",
               compact && "p-3"
             )}
             style={{ color: `var(--note-${color}-fg)` }}
           >
-            <Link href={`/catatan/${note.id}`} className="absolute inset-0 z-0" aria-label={`Buka catatan: ${note.title || "Tanpa judul"}`} />
+            <Link href={`/catatan/${note.id}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={`Buka catatan: ${getDisplayTitle(note)}`} />
             <div className="pointer-events-none">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <NoteTypeIcon type={note.type} size={18} />
-                  <h3 className={cn("font-semibold", compact ? "text-sm" : "text-base")}>{note.title || "Tanpa judul"}</h3>
+                  <h3 className={cn("font-semibold", compact ? "text-sm" : "text-base")}>{getDisplayTitle(note)}</h3>
                 </div>
-                <div className="flex items-center gap-1 pointer-events-auto relative z-10">
+                <div className="flex items-center gap-1 pointer-events-auto relative z-[2]">
                   {note.isPinned && <Icon icon={PushPin} size={14} weight="fill" className="text-[var(--accent)]" />}
                   <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
                     <DropdownMenuTrigger asChild>
