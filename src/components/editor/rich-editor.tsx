@@ -19,6 +19,7 @@ import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { updateNote, togglePinNote, listCollections, moveNoteToCollection, createNote, unarchiveNote, restoreNote } from "@/lib/db/repo";
+import { setupFlushHandlers } from "@/lib/sync/engine";
 import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Button } from "@/components/ui/button";
@@ -108,10 +109,17 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
   }, []);
 
   useEffect(() => {
-    if (focusMode && editorContainerRef.current) {
-      editorContainerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [focusMode]);
+    const flush = () => {
+      if (editor) {
+        const text = editor.getText();
+        updateNote(noteId, { title, content: editor.getJSON(), contentText: text });
+      }
+    };
+    setupFlushHandlers(flush);
+    return () => {
+      flush();
+    };
+  }, [editor, title, noteId]);
 
   useEffect(() => {
     if (isNew && !created) return;
