@@ -11,6 +11,7 @@ import type {
   Settings,
   OutboxItem,
   NoteCollection,
+  Backup,
 } from "@/lib/notes/types";
 
 export class VinoteDB extends Dexie {
@@ -26,6 +27,7 @@ export class VinoteDB extends Dexie {
   outbox!: Table<OutboxItem, number>;
   meta!: Table<{ key: string; value: unknown }, string>;
   noteCollections!: Table<NoteCollection, [string, string]>;
+  backups!: Table<Backup, string>;
 
   constructor() {
     super("vinote");
@@ -93,6 +95,9 @@ export class VinoteDB extends Dexie {
         }
         if (rels.length) return tx.table("noteCollections").bulkAdd(rels);
       });
+    });
+    this.version(4).stores({
+      backups: "id, createdAt",
     });
   }
 }

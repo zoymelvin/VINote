@@ -157,6 +157,13 @@ export const NOTE_COLORS: CardColor[] = [
 
 export const EMPTY_NOTE_CONTENT = { type: "doc", content: [{ type: "paragraph" }] };
 
+export interface Backup {
+  id: string;
+  createdAt: number;
+  data: string; // JSON string of all notes
+  size: number;
+}
+
 export function normalizeCardColor(color: string | undefined): CardColor {
   const legacy: Record<string, CardColor> = {
     neutral: "polos",

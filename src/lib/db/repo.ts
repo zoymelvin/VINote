@@ -1,5 +1,5 @@
 import { db } from "@/lib/db/db";
-import type { Note, Collection, Tag, CardColor, Settings, NoteCollection } from "@/lib/notes/types";
+import type { Note, Collection, Tag, CardColor, Settings, NoteCollection, Backup } from "@/lib/notes/types";
 import { uid, now } from "@/lib/utils";
 import { normalizeCardColor } from "@/lib/notes/types";
 import Fuse from "fuse.js";
@@ -337,6 +337,45 @@ export async function getSettings(userId: string) {
 export async function saveSettings(s: Settings) {
   await db.settings.put(s);
   return s;
+}
+
+export async function createBackup(): Promise<Backup> {
+  const notes = await db.notes.toArray();
+  const data = JSON.stringify(notes);
+  const backup: Backup = {
+    id: uid(),
+    createdAt: now(),
+    data,
+    size: data.length,
+  };
+  await db.backups.add(backup);
+  // Keep only 3 most recent
+  const all = await db.backups.orderBy("createdAt").reverse().toArray();
+  if (all.length > 3) {
+    const toDelete = all.slice(3);
+    await db.backups.bulkDelete(toDelete.map((b) => b.id));
+  }
+  return backup;
+}
+
+export async function listBackups() {
+  return db.backups.orderBy("createdAt").reverse().toArray();
+}
+
+export async function restoreBackup(backupId: string) {
+  const backup = await db.backups.get(backupId);
+  if (!backup) return null;
+  const notes = JSON.parse(backup.data) as Note[];
+  await db.notes.bulkPut(notes);
+  return notes.length;
+}
+
+export async function listUnsyncedNotes() {
+  const all = await db.notes.filter((n) => !n.deletedAt).toArray();
+  const outboxIds = new Set(
+    (await db.outbox.toArray()).map((o) => (o.payload as Record<string, unknown>)?.id).filter(Boolean)
+  );
+  return all.filter((n) => outboxIds.has(n.id) || true); // Simplified: all notes that might be unsynced
 }
 
 export { CardColor };
