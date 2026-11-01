@@ -13,7 +13,7 @@ import { Avatar } from "@/components/shared/avatar";
 import { useProfile } from "@/stores/profile";
 import { CollectionIcon } from "@/components/shared/collection-icon";
 import { CollectionPickerProvider, useCollectionPicker } from "@/components/shared/collection-picker-provider";
-import { House, ClockCounterClockwise, Stack, GearSix, Archive, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
+import { House, ClockCounterClockwise, Stack, GearSix, Archive, Trash, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
 
 const tabs = [
@@ -21,6 +21,7 @@ const tabs = [
   { href: "/riwayat", label: "Riwayat", icon: ClockCounterClockwise },
   { href: "/koleksi", label: "Koleksi", icon: Stack },
   { href: "/arsip", label: "Arsip", icon: Archive },
+  { href: "/sampah", label: "Sampah", icon: Trash },
   { href: "/pengaturan", label: "Pengaturan", icon: GearSix },
 ];
 

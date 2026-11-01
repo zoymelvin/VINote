@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Field } from "@/components/shared/field";
 import { Avatar } from "@/components/shared/avatar";
 import { useState } from "react";
+import * as React from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Palette, Monitor, Download, Question, Trash, User, Camera } from "@phosphor-icons/react";
+import { Palette, Monitor, Download, Question, Trash, Archive, User, Camera } from "@phosphor-icons/react";
 import { Icon } from "@/components/icons";
 import { ACCENT_LABEL, THEME_LABEL } from "@/lib/labels";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,14 @@ export default function PengaturanPage() {
   const { theme, setTheme, setAccent } = useTheme();
   const router = useRouter();
   const profile = useProfile();
+  const [sessionEmail, setSessionEmail] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    const client = createClient();
+    if (!client) return;
+    client.auth.getSession().then(({ data: { session } }) => {
+      setSessionEmail(session?.user?.email ?? null);
+    });
+  }, []);
   const [editOpen, setEditOpen] = useState(false);
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [username, setUsername] = useState(profile.username);
@@ -47,6 +56,7 @@ export default function PengaturanPage() {
   const [unsynced, setUnsynced] = useState<Awaited<ReturnType<typeof listUnsyncedNotes>>>([]);
   const [backupOpen, setBackupOpen] = useState(false);
   const [unsyncedOpen, setUnsyncedOpen] = useState(false);
+  const [mounted] = React.useState(() => typeof window !== "undefined");
 
   async function resizeToJpeg(file: File): Promise<Blob> {
     const img = await createImageBitmap(file);
@@ -157,14 +167,14 @@ export default function PengaturanPage() {
         <div className="min-w-0">
           <div className="font-semibold">{profile.displayName}</div>
           <div className="text-xs text-[var(--text-muted)]">@{profile.username}</div>
-          <div className="text-xs text-[var(--text-muted)]">{profile.email}</div>
+          <div className="text-xs text-[var(--text-muted)]">{sessionEmail || "Belum masuk"}</div>
         </div>
         <Button variant="secondary" className="ml-auto" onClick={() => setEditOpen(true)}><Icon icon={User} size={16} /> Edit profil</Button>
       </div>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-muted)]">Tampilan</h2>
-        <SettingsRow icon={<Icon icon={Monitor} size={20} />} label="Tema" description={THEME_LABEL[theme]}>
+        <SettingsRow icon={<Icon icon={Monitor} size={20} />} label="Tema" description={mounted ? THEME_LABEL[theme] : undefined}>
           <div className="w-full overflow-x-auto md:w-auto">
             <Segmented options={[{ id: "light", label: "Terang" }, { id: "dark", label: "Gelap" }, { id: "system", label: "Sistem" }]} value={theme} onChange={(id: string) => setTheme(id as "light" | "dark" | "system")} className="min-w-[200px]" />
           </div>
@@ -194,6 +204,12 @@ export default function PengaturanPage() {
         </SettingsRow>
         <SettingsRow icon={<Icon icon={Download} size={20} />} label="Periksa catatan yang belum tersinkron" description="Daftar catatan lokal/gagal">
           <Button size="sm" variant="secondary" onClick={() => { loadUnsynced(); setUnsyncedOpen(true); }}>Buka</Button>
+        </SettingsRow>
+        <SettingsRow icon={<Icon icon={Archive} size={20} />} label="Arsip" description="Catatan yang diarsipkan">
+          <Button size="sm" variant="secondary" onClick={() => router.push("/arsip")}>Buka</Button>
+        </SettingsRow>
+        <SettingsRow icon={<Icon icon={Trash} size={20} />} label="Sampah" description="Catatan yang dihapus">
+          <Button size="sm" variant="secondary" onClick={() => router.push("/sampah")}>Buka</Button>
         </SettingsRow>
       </section>
 
@@ -235,7 +251,7 @@ export default function PengaturanPage() {
             <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" />
           </Field>
           <Field label="Email">
-            <Input value={profile.email} disabled placeholder="email@contoh.com" />
+            <Input value={sessionEmail || "Belum masuk"} disabled placeholder="email@contoh.com" />
           </Field>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setEditOpen(false)}>Batal</Button>
