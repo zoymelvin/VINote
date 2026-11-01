@@ -5,3 +5,5 @@ node_modules/
 .env*.local
 coverage/
 *.tsbuildinfo
+public/sw.js
+public/swe-worker-*.js
