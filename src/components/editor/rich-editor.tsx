@@ -92,6 +92,10 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     ],
     content: initialContent as never,
     immediatelyRender: false,
+    onCreate: ({ editor: ed }) => {
+      const text = ed.getText();
+      setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
+    },
     onUpdate: ({ editor: ed }) => {
       const text = ed.getText();
       setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
@@ -115,11 +119,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       }
     },
   });
-  useEffect(() => {
-    if (!editor) return;
-    const text = editor.getText();
-    setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
-  }, [editor]);
+
 
 
 
