@@ -18,8 +18,10 @@ export default function NotePage() {
 
   // Track when useLiveQuery has resolved
   useEffect(() => {
-    if (note !== undefined || note === null) {
-      setResolved(true);
+    if (note !== undefined) {
+      // Note exists or not found - mark as resolved
+      const timer = setTimeout(() => setResolved(true), 0);
+      return () => clearTimeout(timer);
     }
   }, [note]);
 
