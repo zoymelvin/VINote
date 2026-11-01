@@ -80,29 +80,26 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     ],
     content: initialContent as never,
     immediatelyRender: false,
-    onUpdate: async ({ editor: ed }) => {
+    onUpdate: ({ editor: ed }) => {
       const text = ed.getText();
       setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
       if (isNewRef.current && !createdRef.current) {
         const hasContent = text.trim().length > 0 || titleRef.current.trim().length > 0;
         if (hasContent) {
-          // Check if note already exists in DB before creating
-          const existing = await db.notes.get(noteId);
-          if (existing) {
-            // Note already exists, just update it
-            await updateNote(noteId, { title: titleRef.current.trim(), content: ed.getJSON(), contentText: text });
-            setCreated(true);
-          } else {
-            try {
-              await createNote({ id: noteId, type: "text", title: titleRef.current.trim(), content: ed.getJSON(), contentText: text });
-              setCreated(true);
-            } catch {
-              // Race condition: note was created by another call, update instead
-              await updateNote(noteId, { title: titleRef.current.trim(), content: ed.getJSON(), contentText: text });
-              setCreated(true);
+          db.notes.get(noteId).then((existing) => {
+            if (existing) {
+              updateNote(noteId, { title: titleRef.current.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
+            } else {
+              createNote({ id: noteId, type: "text", title: titleRef.current.trim(), content: ed.getJSON(), contentText: text })
+                .then(() => setCreated(true))
+                .catch(() => {
+                  updateNote(noteId, { title: titleRef.current.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
+                });
             }
-          }
+          });
         }
+      } else {
+        scheduleSave();
       }
     },
   });
@@ -162,17 +159,25 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     };
   }, [editor, noteId]);
 
-  useEffect(() => {
-    if (isNew && !created) return;
-    const t = setTimeout(async () => {
-      if (!editor) return;
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleSave = useCallback(() => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const ed = editorRef.current;
+      if (!ed) return;
       setSaving(true);
-      const text = editor.getText();
-      await updateNote(noteId, { title: titleRef.current, content: editor.getJSON(), contentText: text });
+      const text = ed.getText();
+      await updateNote(noteId, { title: titleRef.current, content: ed.getJSON(), contentText: text });
       setSaving(false);
     }, 800);
-    return () => clearTimeout(t);
-  }, [title, html, editor, noteId, isNew, created]);
+  }, [noteId]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
 
   const toggleBold = useCallback(() => editor?.chain().focus().toggleBold().run(), [editor]);
   const toggleItalic = useCallback(() => editor?.chain().focus().toggleItalic().run(), [editor]);
