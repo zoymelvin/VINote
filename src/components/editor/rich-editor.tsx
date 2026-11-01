@@ -18,6 +18,7 @@ import FontFamily from "@tiptap/extension-font-family";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { useEffect, useState, useCallback, useRef } from "react";
+import { db } from "@/lib/db/db";
 import { updateNote, togglePinNote, listCollections, moveNoteToCollection, createNote, unarchiveNote, restoreNote } from "@/lib/db/repo";
 import { setupFlushHandlers } from "@/lib/sync/engine";
 import { useRouter } from "next/navigation";
@@ -79,13 +80,21 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     ],
     content: initialContent as never,
     immediatelyRender: false,
-    onUpdate: ({ editor: ed }) => {
+    onUpdate: async ({ editor: ed }) => {
       const text = ed.getText();
       setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
       if (isNewRef.current && !createdRef.current) {
         const hasContent = text.trim().length > 0 || titleRef.current.trim().length > 0;
         if (hasContent) {
-          createNote({ id: noteId, type: "text", title: titleRef.current.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
+          // Check if note already exists in DB before creating
+          const existing = await db.notes.get(noteId);
+          if (existing) {
+            // Note already exists, just update it
+            await updateNote(noteId, { title: titleRef.current.trim(), content: ed.getJSON(), contentText: text });
+            setCreated(true);
+          } else {
+            createNote({ id: noteId, type: "text", title: titleRef.current.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
+          }
         }
       }
     },
