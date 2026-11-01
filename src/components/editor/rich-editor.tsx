@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/icons";
 import { cn, getDisplayTitle } from "@/lib/utils";
+import { MobileEditorToolbar } from "@/components/editor/mobile-toolbar";
 import { CollectionPicker } from "@/components/shared/collection-picker";
 import { ArrowLeft, PushPin, ClockCounterClockwise, ArrowsOutSimple, ArrowsInSimple, List, CaretDown, TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, TextAa, Highlighter, Archive, Trash, FolderSimplePlus, ImageSquare, PencilSimple, Check } from "@phosphor-icons/react";
 import type { Collection, Tag } from "@/lib/notes/types";
@@ -56,6 +57,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     return Boolean(isNew);
   });
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   const isNewRef = useRef(isNew);
   const createdRef = useRef(created);
   const isEditingRef = useRef(isEditing);
@@ -360,7 +362,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
         </div>
 
         {isEditing && (
-        <div className="mb-2 flex flex-wrap items-center gap-1 rounded-2xl bg-[var(--card)] p-1.5 shadow-[var(--shadow-1)]">
+        <div className="hidden md:block mb-2 flex flex-wrap items-center gap-1 rounded-2xl bg-[var(--card)] p-1.5 shadow-[var(--shadow-1)]">
           <ToolbarGroup>
             <ToolbarBtn onClick={() => setHeading(1)} active={editor?.isActive("heading", { level: 1 })}><Icon icon={TextHOne} size={18} /></ToolbarBtn>
             <ToolbarBtn onClick={() => setHeading(2)} active={editor?.isActive("heading", { level: 2 })}><Icon icon={TextHTwo} size={18} /></ToolbarBtn>
@@ -431,6 +433,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
         </div>
 
         )}
+        <MobileEditorToolbar editor={editor} onTogglePanel={() => setPanelOpen((v) => !v)} panelOpen={panelOpen} />
         {showReplace && (
           <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl bg-[var(--card)] p-3">
             <Input placeholder="Cari" className="h-9 w-40" onChange={() => {}} />

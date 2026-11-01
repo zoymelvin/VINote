@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <CollectionPickerProvider>
-    <div className="flex min-h-[100dvh] bg-[var(--background)]">
+    <div className="flex flex-col md:flex-row min-h-[100dvh] bg-[var(--background)]">
       <aside className={cn("hidden md:flex md:flex-col md:sticky md:top-0 md:h-[100dvh] md:border-r md:border-[var(--border)] md:p-4 md:transition-all md:overflow-y-auto", collapsed ? "md:w-20" : "md:w-64")}>
         <div className="mb-4 flex items-center justify-between">
           {!collapsed && (
@@ -158,7 +158,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 py-1 active:scale-95 transition-transform"
               >
                 <Icon icon={t.icon} size={24} weight={active ? "fill" : "regular"} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
-                <span className={cn("text-[10.5px] leading-none", active ? "font-medium text-[var(--accent)]" : "text-[var(--text-muted)]")}>{t.label}</span>
+                <span className={cn("text-[11px] leading-none", active ? "font-medium text-[var(--accent)]" : "text-[var(--text-muted)]")}>{t.label}</span>
               </Link>
             );
           })}
