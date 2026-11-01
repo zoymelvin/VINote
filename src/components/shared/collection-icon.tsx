@@ -14,30 +14,21 @@ const EMOJI_MAP: Record<string, string> = {
   "📚": "Books", "🎯": "Target", "✈️": "AirplaneTilt", "💪": "Barbell", "🧘": "FlowerLotus",
 };
 
-function hashHue(str: string): number {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h << 5) - h + str.charCodeAt(i);
-  const hues = [355, 330, 295, 265, 235, 195, 160, 125, 95, 55];
-  return hues[Math.abs(h) % hues.length];
-}
-
-export function CollectionIcon({ icon, color, size = 28 }: { icon?: string; color?: string; size?: number }) {
-  const hue = color ? parseInt(color.replace("#", ""), 16) % 360 : hashHue(icon || "folder");
+export function CollectionIcon({ icon, size = 28 }: { icon?: string; color?: string; size?: number }) {
   const phosphorName = EMOJI_MAP[icon || ""] || icon || "Folder";
   const IconComp = ICON_CATALOG[phosphorName] || Folder;
-  const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
-  const bg = isDark ? `oklch(0.30 0.06 ${hue})` : `oklch(0.72 0.17 ${hue})`;
-  const bg2 = isDark ? `oklch(0.25 0.05 ${hue})` : `oklch(0.60 0.19 ${hue})`;
-  const fg = isDark ? `oklch(0.80 0.12 ${hue})` : "oklch(0.98 0.01 0)";
+  const radius = size <= 24 ? 8 : size <= 40 ? 12 : 16;
   const iconSize = Math.round(size * 0.5);
   return (
     <div
-      className="flex items-center justify-center rounded-xl shadow-sm"
+      className="flex items-center justify-center"
       style={{
         width: size,
         height: size,
-        background: `linear-gradient(135deg, ${bg}, ${bg2})`,
-        color: fg,
+        borderRadius: radius,
+        background: "color-mix(in oklch, var(--accent) 18%, var(--surface))",
+        border: "1px solid color-mix(in oklch, var(--accent) 25%, transparent)",
+        color: "var(--accent)",
       }}
     >
       <Icon icon={IconComp} size={iconSize} weight="duotone" />
