@@ -2,14 +2,16 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { getCollection, updateCollection, softDeleteCollection, getNotesOfCollection, createNote } from "@/lib/db/repo";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
-import { ArrowLeft, Plus } from "@phosphor-icons/react";
+import { useState, useMemo } from "react";
+import { ArrowLeft, Plus, Trash } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/icons";
 import { NoteCard } from "@/components/shared/note-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { CollectionIcon } from "@/components/shared/collection-icon";
+import { ListSearch } from "@/components/shared/list-search";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
 
@@ -21,13 +23,21 @@ export default function KoleksiDetailPage() {
   const collection = useLiveQuery(() => getCollection(id), [id]);
   const notes = useLiveQuery(() => getNotesOfCollection(id), [id]);
   const [editing, setEditing] = useState(false);
-  const [name, setName] = useState(collection?.name ?? "");
+  const [name, setName] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [query, setQuery] = useState("");
 
   if (!collection) return <div className="p-4">Memuat...</div>;
 
+  const filtered = useMemo(() => {
+    const all = notes ?? [];
+    if (!query.trim()) return all;
+    const q = query.toLowerCase();
+    return all.filter((n) => (n.title || "").toLowerCase().includes(q) || (n.contentText || "").toLowerCase().includes(q));
+  }, [notes, query]);
+
   async function saveName() {
-    await updateCollection(id, { name: name.trim() || "Tanpa judul" });
+    await updateCollection(id, { name: name.trim() || collection?.name || "Tanpa judul" });
     setEditing(false);
   }
 
@@ -44,34 +54,42 @@ export default function KoleksiDetailPage() {
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6 flex items-center gap-3">
-         <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
-        {editing ? (
-          <Input value={name} onChange={(e) => setName(e.target.value)} onBlur={saveName} onKeyDown={(e) => e.key === "Enter" && saveName()} autoFocus />
-        ) : (
-          <h1 onClick={() => setEditing(true)} className="cursor-pointer font-display text-2xl font-normal tracking-tight md:text-3xl">{collection.name}</h1>
-        )}
+        <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
+        <CollectionIcon icon={collection.icon} size={56} />
+        <div className="flex-1 min-w-0">
+          {editing ? (
+            <Input value={name} onChange={(e) => setName(e.target.value)} onBlur={saveName} onKeyDown={(e) => e.key === "Enter" && saveName()} autoFocus />
+          ) : (
+            <h1 onClick={() => { setName(collection.name); setEditing(true); }} className="cursor-pointer text-2xl font-semibold tracking-tight md:text-3xl">{collection.name}</h1>
+          )}
+          <p className="text-sm text-[var(--text-muted)]">{collection.description || "Koleksi"}</p>
+          <p className="text-xs text-[var(--text-muted)]">{notes?.length ?? 0} catatan</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={addNoteHere}><Icon icon={Plus} size={18} /> Catatan baru</Button>
+          <Button variant="secondary" onClick={() => {}}>Tambahkan yang sudah ada</Button>
+        </div>
       </div>
 
-      {notes && notes.length === 0 ? (
+      <ListSearch value={query} onChange={setQuery} placeholder="Cari di koleksi..." />
+
+      {filtered.length === 0 && (notes?.length ?? 0) === 0 ? (
         <EmptyState
           icon={<Icon icon={Plus} size={32} weight="regular" className="text-[var(--accent)]" />}
           title="Belum ada catatan"
           description="Tambahkan catatan pertama ke koleksi ini."
           action={<Button onClick={addNoteHere}><Icon icon={Plus} size={18} weight="regular" /> Catatan baru</Button>}
         />
+      ) : filtered.length === 0 ? (
+        <EmptyState title="Tidak ada hasil" description={`Tidak ada hasil untuk "${query}".`} />
       ) : (
-        <>
-          <div className="mb-4">
-            <Button onClick={addNoteHere}><Icon icon={Plus} size={18} weight="regular" /> Catatan baru di sini</Button>
-          </div>
-          <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.04 } } }} initial="hidden" animate="show" className="columns-1 gap-3 sm:columns-2 lg:columns-3 [&>*]:break-inside-avoid [&>*]:mb-3">
-            {(notes ?? []).map((n) => (
-              <m.div key={n.id} variants={{ hidden: { opacity: 0, y: reduced ? 0 : 6 }, show: { opacity: 1, y: 0 } }}>
-                <NoteCard note={n} />
-              </m.div>
-            ))}
-          </m.div>
-        </>
+        <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.04 } } }} initial="hidden" animate="show" className="columns-1 gap-3 sm:columns-2 lg:columns-3 [&>*]:break-inside-avoid [&>*]:mb-3">
+          {filtered.map((n) => (
+            <m.div key={n.id} variants={{ hidden: { opacity: 0, y: reduced ? 0 : 6 }, show: { opacity: 1, y: 0 } }}>
+              <NoteCard note={n} />
+            </m.div>
+          ))}
+        </m.div>
       )}
 
       <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Hapus koleksi">

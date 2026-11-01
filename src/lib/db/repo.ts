@@ -28,10 +28,12 @@ export async function createNote(input: Partial<Note> = {}): Promise<Note> {
     historyHiddenAt: null,
     version: input.version ?? 1,
   };
-  await db.notes.add(note);
-  if (input.folderId) {
-    await addNoteToCollections(note.id, [input.folderId], note.userId);
-  }
+  await db.transaction("rw", db.notes, db.noteCollections, async () => {
+    await db.notes.add(note);
+    if (input.folderId) {
+      await addNoteToCollections(note.id, [input.folderId], note.userId);
+    }
+  });
   return note;
 }
 
@@ -106,11 +108,27 @@ export async function duplicateNote(id: string) {
 }
 
 export async function archiveNote(id: string) {
-  return updateNote(id, { isArchived: true });
+  const current = await db.notes.get(id);
+  if (!current) return null;
+  const updated = { ...current, isArchived: true, updatedAt: now() };
+  await db.transaction("rw", db.notes, db.outbox, async () => {
+    await db.notes.put(updated);
+    const { enqueue } = await import("@/lib/sync/engine");
+    await enqueue("notes", "upsert", { id: updated.id, user_id: updated.userId, is_archived: true, updated_at: new Date(updated.updatedAt).toISOString() });
+  });
+  return updated;
 }
 
 export async function unarchiveNote(id: string) {
-  return updateNote(id, { isArchived: false });
+  const current = await db.notes.get(id);
+  if (!current) return null;
+  const updated = { ...current, isArchived: false, updatedAt: now() };
+  await db.transaction("rw", db.notes, db.outbox, async () => {
+    await db.notes.put(updated);
+    const { enqueue } = await import("@/lib/sync/engine");
+    await enqueue("notes", "upsert", { id: updated.id, user_id: updated.userId, is_archived: false, updated_at: new Date(updated.updatedAt).toISOString() });
+  });
+  return updated;
 }
 
 export async function moveNoteToCollection(id: string, collectionId: string | null) {
@@ -152,7 +170,7 @@ export async function listNotes(filter?: { includeDeleted?: boolean; archived?: 
 }
 
 export async function listHistory() {
-  const all = await db.notes.filter((n) => !n.deletedAt && (n.historyHiddenAt == null || (n.lastOpenedAt ?? n.updatedAt) > (n.historyHiddenAt ?? 0))).toArray();
+  const all = await db.notes.filter((n) => !n.deletedAt && !n.isArchived && (n.historyHiddenAt == null || (n.lastOpenedAt ?? n.updatedAt) > (n.historyHiddenAt ?? 0))).toArray();
   return all.sort((a, b) => (b.lastOpenedAt ?? b.updatedAt) - (a.lastOpenedAt ?? a.updatedAt));
 }
 

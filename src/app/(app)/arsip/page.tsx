@@ -28,7 +28,7 @@ export default function ArsipPage() {
       <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.04 } } }} initial="hidden" animate="show" className="space-y-2">
         {(notes ?? []).map((n) => (
           <m.div key={n.id} variants={{ hidden: { opacity: 0, y: reduced ? 0 : 4 }, show: { opacity: 1, y: 0 } }}>
-            <NoteRow note={n} onRemove={() => remove(n)} />
+            <NoteRow note={n} onRemove={() => remove(n)} archived />
           </m.div>
         ))}
       </m.div>
