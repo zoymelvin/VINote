@@ -72,20 +72,31 @@ export default function DiagnostikPage() {
       res.push({ step: "Storage", ok: !error, message: error ? error.message : "Storage tersedia" });
     }
 
-    // Step 6: Local vs server count
-    const localCount = await db.notes.count();
-    let serverCount = 0;
-    if (supabase) {
-      const { count } = await supabase.from("notes").select("*", { count: "exact", head: true });
-      serverCount = count ?? 0;
+    // Step 6: Local vs server count per entity
+    const entities = ["notes", "folders", "note_collections", "profiles", "settings", "note_revisions"];
+    for (const entity of entities) {
+      const localCount = entity === "notes" ? await db.notes.count() :
+        entity === "folders" ? await db.folders.count() :
+        entity === "note_collections" ? await db.noteCollections.count() :
+        entity === "settings" ? await db.settings.count() :
+        entity === "note_revisions" ? await db.revisions.count() : 0;
+      let serverCount = 0;
+      if (supabase) {
+        const { count } = await supabase.from(entity).select("*", { count: "exact", head: true });
+        serverCount = count ?? 0;
+      }
+      res.push({ step: `${entity}: lokal vs server`, ok: true, message: `${localCount} lokal, ${serverCount} server` });
     }
-    const outboxCount = await db.outbox.count();
-    res.push({ step: "Catatan lokal", ok: true, message: `${localCount} lokal, ${serverCount} server, ${outboxCount} tertunda` });
 
     // Step 7: Outbox status
     const outboxItems = await db.outbox.toArray();
     const failed = outboxItems.filter((i) => i.attempts > 3);
-    res.push({ step: "Outbox", ok: failed.length === 0, message: failed.length > 0 ? `${failed.length} gagal` : `${outboxItems.length} tertunda` });
+    const byTable = outboxItems.reduce((acc, i) => {
+      acc[i.table] = (acc[i.table] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const byTableStr = Object.entries(byTable).map(([t, c]) => `${t}:${c}`).join(", ");
+    res.push({ step: "Outbox", ok: failed.length === 0, message: failed.length > 0 ? `${failed.length} gagal` : `${outboxItems.length} tertunda (${byTableStr})` });
 
     setResults(res);
     setCopyText(res.map((r) => `${r.ok ? "✓" : "✗"} ${r.step}: ${r.message}${r.latency ? ` (${r.latency}ms)` : ""}`).join("\n"));
