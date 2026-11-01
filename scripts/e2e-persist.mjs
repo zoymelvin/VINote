@@ -79,7 +79,7 @@ async function runScenario(page, scenarioName) {
   const editor = page.locator('.tiptap, .ProseMirror').first();
   await editor.click();
   await page.keyboard.type("Isi uji 123");
-  await page.waitForTimeout(1000); // wait for autosave
+  await page.waitForTimeout(2000); // wait longer for autosave
 
   // Check "Tersimpan" indicator
   const savedIndicator = await page.locator('text=Tersimpan').count();
