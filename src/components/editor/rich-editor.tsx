@@ -46,6 +46,12 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
   const [showReplace, setShowReplace] = useState(false);
   const [wordCount, setWordCount] = useState({ words: 0, chars: 0 });
   const [created, setCreated] = useState(false);
+  const isNewRef = useRef(isNew);
+  const createdRef = useRef(created);
+  const titleRef = useRef(title);
+  isNewRef.current = isNew;
+  createdRef.current = created;
+  titleRef.current = title;
   const collections = useLiveQuery(() => listCollections(), []);
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
@@ -73,15 +79,27 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
     onUpdate: ({ editor: ed }) => {
       const text = ed.getText();
       setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
-      if (isNew && !created) {
-        const hasContent = text.trim().length > 0 || title.trim().length > 0;
+      if (isNewRef.current && !createdRef.current) {
+        const hasContent = text.trim().length > 0 || titleRef.current.trim().length > 0;
         if (hasContent) {
-          createNote({ id: noteId, type: "text", title: title.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
+          createNote({ id: noteId, type: "text", title: titleRef.current.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
         }
       }
     },
   });
   const editorRef = useRef(editor);
+  editorRef.current = editor;
+
+  useEffect(() => {
+    if (editor && initialContent) {
+      const currentContent = JSON.stringify(editor.getJSON());
+      const newContent = JSON.stringify(initialContent);
+      if (currentContent !== newContent) {
+        editor.commands.setContent(initialContent as import("@tiptap/core").Content, { emitUpdate: false });
+      }
+    }
+  }, [editor, initialContent]);
+
 
   const html = editor?.getHTML();
 
