@@ -97,14 +97,11 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
     },
     onUpdate: ({ editor: ed }) => {
-      const text = ed.getText();
-      if (wordCountTimerRef.current) clearTimeout(wordCountTimerRef.current);
-      wordCountTimerRef.current = setTimeout(() => {
-        setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
-      }, 120);
+      // Defer expensive text extraction; only compute on save or debounced word count
       if (isNewRef.current && !createdRef.current) {
-        const hasContent = text.trim().length > 0 || titleRef.current.trim().length > 0;
+        const hasContent = !ed.isEmpty || titleRef.current.trim().length > 0;
         if (hasContent) {
+          const text = ed.getText();
           db.notes.get(noteId).then((existing) => {
             if (existing) {
               updateNote(noteId, { title: titleRef.current.trim(), content: ed.getJSON(), contentText: text }).then(() => setCreated(true));
@@ -120,6 +117,22 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
       } else if (isEditingRef.current) {
         scheduleSave();
       }
+      // Debounced word count using CharacterCount extension (incremental, cheaper than getText)
+      if (wordCountTimerRef.current) clearTimeout(wordCountTimerRef.current);
+      wordCountTimerRef.current = setTimeout(() => {
+        try {
+          const cc = (ed as unknown as { storage?: { characterCount?: { words?: () => number; characters?: () => number } } }).storage?.characterCount;
+          if (cc && typeof cc.words === "function") {
+            setWordCount({ words: cc.words?.() ?? 0, chars: cc.characters?.() ?? 0 });
+          } else {
+            const text = ed.getText();
+            setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
+          }
+        } catch {
+          const text = ed.getText();
+          setWordCount({ words: text.split(/\s+/).filter(Boolean).length, chars: text.length });
+        }
+      }, 300);
     },
   });
 
