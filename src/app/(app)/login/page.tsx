@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/shared/page-header";
 import { Icon } from "@/components/icons";
-import { Key, ArrowLeft, Envelope } from "@phosphor-icons/react";
+import { ArrowLeft, Envelope } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
-  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(0);
@@ -27,7 +28,6 @@ export default function LoginPage() {
     });
     setLoading(false);
     if (err) { setError(err.message); return; }
-    setSent(true);
     setStep("code");
     setCountdown(60);
     const timer = setInterval(() => {
@@ -50,7 +50,7 @@ export default function LoginPage() {
     });
     setLoading(false);
     if (err) { setError(err.message); return; }
-    window.location.href = "/";
+    router.push("/");
   }
 
   async function resendCode() {
