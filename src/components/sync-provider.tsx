@@ -1,9 +1,8 @@
 "use client";
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { syncAll, processOutbox, pullNotes, subscribeRealtime } from "@/lib/sync/engine";
+import { syncAll, subscribeRealtime } from "@/lib/sync/engine";
 import { db } from "@/lib/db/db";
-import type { Note } from "@/lib/notes/types";
 
 export type SyncStatus = "local" | "pending" | "syncing" | "synced" | "offline" | "failed";
 
@@ -69,8 +68,8 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Initial sync
-    doSync();
+    // Initial sync after mount
+    const timer = setTimeout(() => doSync(), 0);
 
     // Periodic sync every 30s
     const interval = setInterval(() => {
