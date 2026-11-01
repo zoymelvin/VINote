@@ -1,6 +1,6 @@
 "use client";
 import { useLiveQuery } from "dexie-react-hooks";
-import { listHistory, softDeleteNote, duplicateNote } from "@/lib/db/repo";
+import { listHistory, softDeleteNote, duplicateNote, archiveNote } from "@/lib/db/repo";
 import { db } from "@/lib/db/db";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,11 @@ export default function RiwayatPage() {
   async function remove(n: { id: string }) {
     await softDeleteNote(n.id);
     toast.push({ message: "Dipindahkan ke Sampah", undo: async () => db.notes.update(n.id, { deletedAt: null }) });
+  }
+
+  async function onArchive(n: { id: string }) {
+    await archiveNote(n.id);
+    toast.push({ message: "Diarsipkan" });
   }
 
   async function hideFromHistory(n: { id: string }) {
@@ -87,7 +92,7 @@ export default function RiwayatPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem icon={<Icon icon={Copy} size={18} />} onSelect={() => duplicateNote(n.id)}>Duplikat</DropdownMenuItem>
-                    <DropdownMenuItem icon={<Icon icon={Archive} size={18} />} onSelect={() => {}}>Arsipkan</DropdownMenuItem>
+                    <DropdownMenuItem icon={<Icon icon={Archive} size={18} />} onSelect={() => onArchive(n)}>Arsipkan</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem icon={<Icon icon={EyeSlash} size={18} />} onSelect={() => hideFromHistory(n)}>Hapus dari riwayat</DropdownMenuItem>
                     <DropdownMenuItem icon={<Icon icon={Trash} size={18} />} onSelect={() => remove(n)} className="text-rose-600">Hapus</DropdownMenuItem>

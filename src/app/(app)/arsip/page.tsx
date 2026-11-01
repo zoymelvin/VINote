@@ -23,7 +23,7 @@ export default function ArsipPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <PageHeader title="Arsip" description="Catatan yang diarsipkan" icon={<Icon icon={Archive} size={24} weight="regular" />} />
+      <PageHeader title="Arsip" description="Catatan yang diarsipkan" />
       {!notes?.length && <EmptyState title="Belum ada arsip" description="Catatan yang diarsipkan akan muncul di sini." />}
       <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.04 } } }} initial="hidden" animate="show" className="space-y-2">
         {(notes ?? []).map((n) => (

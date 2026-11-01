@@ -37,19 +37,6 @@ const noteTypes: { type: string; label: string; icon: React.ComponentType<{ size
   { type: "template", label: "Template", icon: Layout },
 ];
 
-const GRADIENTS: Record<string, string> = {
-  "\u{1F4C1}": "from-gray-400 to-gray-500",
-  "\u{1F4BC}": "from-blue-400 to-blue-600",
-  "\u{1F3E0}": "from-emerald-400 to-emerald-600",
-  "\u{1F4A1}": "from-amber-400 to-amber-600",
-  "\u{1F3A8}": "from-pink-400 to-pink-600",
-  "\u{1F4DA}": "from-indigo-400 to-indigo-600",
-  "\u{1F3AF}": "from-rose-400 to-rose-600",
-  "\u{2708}\u{FE0F}": "from-sky-400 to-sky-600",
-  "\u{1F4AA}": "from-orange-400 to-orange-600",
-  "\u{1F9D8}": "from-teal-400 to-teal-600",
-};
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
@@ -118,9 +105,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col gap-0.5">
               {collapsibleCollections.map((c: Collection) => {
                 const active = path === `/koleksi/${c.id}`;
-                const iconKey = c.icon?.replace(/[^\p{Extended_Pictographic}]/gu, "").trim() || "\u{1F4C1}";
-                const IconComp = iconKey === "\u{1F4C1}" ? Folder : iconKey === "\u{1F4BC}" ? Briefcase : iconKey === "\u{1F3E0}" ? Lightbulb : iconKey === "\u{1F4A1}" ? Lightbulb : iconKey === "\u{1F3A8}" ? Palette : iconKey === "\u{1F4DA}" ? Books : iconKey === "\u{1F3AF}" ? Target : iconKey === "\u{2708}\u{FE0F}" ? AirplaneTilt : iconKey === "\u{1F4AA}" ? Barbell : iconKey === "\u{1F9D8}" ? FlowerLotus : Folder;
-                const gradient = GRADIENTS[iconKey] || "from-gray-400 to-gray-500";
                 return (
                   <Link
                     key={c.id}
