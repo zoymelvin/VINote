@@ -25,6 +25,14 @@ const tabs = [
   { href: "/pengaturan", label: "Pengaturan", icon: GearSix },
 ];
 
+const mobileTabs = [
+  { href: "/", label: "Beranda", icon: House },
+  { href: "/riwayat", label: "Riwayat", icon: ClockCounterClockwise },
+  { href: "/koleksi", label: "Koleksi", icon: Stack },
+  { href: "/arsip", label: "Arsip", icon: Archive },
+  { href: "/pengaturan", label: "Pengaturan", icon: GearSix },
+];
+
 const noteTypes: { type: string; label: string; icon: React.ComponentType<{ size?: number; weight?: IconWeight; className?: string; [key: string]: unknown }> }[] = [
   { type: "text", label: "Teks", icon: NotePencil },
   { type: "checklist", label: "Checklist", icon: CheckSquare },
@@ -133,20 +141,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 pb-[calc(49px+env(safe-area-inset-bottom)+24px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
+      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+64px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
 
       {path !== "/catatan" && !path.startsWith("/catatan/") && (
       <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <div className="flex items-center border-t border-[var(--border)] bg-[var(--card)]/90 backdrop-blur-xl" style={{ height: "49px" }}>
-          {tabs.map((t) => {
-            const active = path === t.href || (t.href !== "/" && path.startsWith(t.href));
+        <div className="mx-4 mb-2 flex items-center justify-around rounded-[32px] border border-[var(--border)] bg-[var(--card)]/70 px-2 py-2 backdrop-blur-xl" style={{ boxShadow: "0 10px 30px -10px rgb(0 0 0 / 0.45)", height: "64px" }}>
+          {mobileTabs.map((t) => {
+            const active = path === t.href;
             return (
               <Link
                 key={t.href}
                 href={t.href}
                 aria-label={t.label}
-                className="flex flex-1 flex-col items-center justify-center gap-0.5"
-                style={{ minHeight: "44px" }}
+                className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 py-1 active:scale-95 transition-transform"
               >
                 <Icon icon={t.icon} size={24} weight={active ? "fill" : "regular"} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
                 <span className={cn("text-[10.5px] leading-none", active ? "font-medium text-[var(--accent)]" : "text-[var(--text-muted)]")}>{t.label}</span>
@@ -164,7 +171,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           className="fixed z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg md:hidden"
           style={{
             right: "16px",
-            bottom: "calc(49px + env(safe-area-inset-bottom) + 16px)",
+            bottom: "calc(env(safe-area-inset-bottom) + 8px + 64px + 16px)",
             background: "linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 85%, black))",
           }}
         >
