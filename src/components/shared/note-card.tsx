@@ -62,7 +62,7 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
       <ContextMenuTrigger>
         <m.article
           layoutId={`note-${note.id}`}
-          whileTap={{ scale: 0.98 }}
+          whileTap={{ scale: 0.985 }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           className={cn(
@@ -72,13 +72,13 @@ export function NoteCard({ note, compact }: { note: Note; compact?: boolean }) {
           style={{ color: `var(--note-${color}-fg)` }}
         >
           <Link href={`/catatan/${note.id}`} className="absolute inset-0 z-0" aria-label={`Buka catatan: ${note.title || "Tanpa judul"}`} />
-          <div className="relative z-[1]">
+          <div className="pointer-events-none">
             <div className="mb-2 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <NoteTypeIcon type={note.type} size={18} />
                 <h3 className={cn("font-semibold", compact ? "text-sm" : "text-base")}>{note.title || "Tanpa judul"}</h3>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 pointer-events-auto relative z-10">
                  {note.isPinned && <Icon icon={PushPin} size={14} weight="fill" className="text-[var(--accent)]" />}
                  <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
                    <DropdownMenuTrigger asChild>
