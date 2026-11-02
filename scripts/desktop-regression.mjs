@@ -9,7 +9,7 @@ const viewports = [
 ];
 const themes = ["light", "dark"];
 
-const out = "/tmp/vinote-baseline";
+const out = "/tmp/vinote-current";
 fs.mkdirSync(out, { recursive: true });
 
 const browser = await chromium.launch();

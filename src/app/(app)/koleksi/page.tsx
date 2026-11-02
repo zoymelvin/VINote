@@ -18,8 +18,42 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { DotsThree, PencilSimple, Trash } from "@phosphor-icons/react";
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
+import type { Collection } from "@/lib/notes/types";
 
 const ICONS = ["📁", "💼", "🏠", "💡", "🎨", "📚", "🎯", "✈️", "💪", "🧘"];
+
+function CollectionCardMobile({ c, counts, onEdit, onDelete }: { c: Collection; counts: Record<string, number>; onEdit: (id: string) => void; onDelete: (id: string) => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  return (
+    <article className="relative cursor-pointer rounded-[16px] border border-[var(--border)] bg-[var(--card)]" style={{ height: "76px", padding: "12px 16px", marginBottom: "10px" }}>
+      <Link href={`/koleksi/${c.id}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={`Buka koleksi: ${c.name}`} />
+      <div className="relative z-[1] flex items-center gap-3 h-full">
+        <CollectionIcon icon={c.icon} color={c.color} size={48} />
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-[16px] leading-[22px] truncate">{c.name}</div>
+          <div className="text-[12.5px] text-[var(--text-muted)]">{counts?.[c.id] ?? 0} catatan{c.description ? ` · ${c.description}` : ""}</div>
+        </div>
+        <div className="relative z-[10] pointer-events-auto">
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="flex h-10 w-10 items-center justify-center rounded-xl hover:bg-[var(--card-muted)]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Icon icon={DotsThree} size={18} weight="bold" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem icon={<Icon icon={PencilSimple} size={18} />} onSelect={() => { setMenuOpen(false); onEdit(c.id); }}>Edit koleksi</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem icon={<Icon icon={Trash} size={18} />} onSelect={() => { setMenuOpen(false); onDelete(c.id); }} className="text-rose-600">Hapus koleksi</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 export default function KoleksiPage() {
   const collections = useLiveQuery(() => listCollections(), []);
@@ -67,36 +101,49 @@ export default function KoleksiPage() {
           action={<Button onClick={() => { setEditingId(null); setDialogOpen(true); }}><Icon icon={Plus} size={18} /> Buat koleksi</Button>}
         />
       ) : (
-        <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.05 } } }} initial="hidden" animate="show" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {noCollection.map((c) => (
-            <m.div key={c.id} variants={{ hidden: { opacity: 0, y: reduced ? 0 : 8 }, show: { opacity: 1, y: 0 } }}>
-              <div className="group relative cursor-pointer rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-1)] transition-transform [@media(hover:hover)]:hover:-translate-y-[1px]">
-                <Link href={`/koleksi/${c.id}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={`Buka koleksi: ${c.name}`} />
-                <div className="relative z-[1] pointer-events-none">
-                  <div className="mb-3 flex items-start justify-between">
-                    <CollectionIcon icon={c.icon} color={c.color} size={40} />
-                    <div className="pointer-events-auto relative z-[2]">
-                      <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="flex h-9 w-9 items-center justify-center rounded-xl opacity-0 transition-opacity group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
-                          <Icon icon={DotsThree} size={18} weight="bold" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem icon={<Icon icon={PencilSimple} size={18} />} onSelect={() => { setEditingId(c.id); setDialogOpen(true); }}>Edit koleksi</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem icon={<Icon icon={Trash} size={18} />} onSelect={() => setDeleteId(c.id)} className="text-rose-600">Hapus koleksi</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+        <div className="md:grid md:grid-cols-2 md:lg:grid-cols-3 md:gap-4">
+          <div className="md:hidden flex flex-col">
+            {noCollection.map((c) => (
+              <CollectionCardMobile
+                key={c.id}
+                c={c}
+                counts={counts ?? {}}
+                onEdit={(id) => { setEditingId(id); setDialogOpen(true); }}
+                onDelete={setDeleteId}
+              />
+            ))}
+          </div>
+          <m.div variants={{ hidden: {}, show: { transition: { staggerChildren: reduced ? 0 : 0.05 } } }} initial="hidden" animate="show" className="hidden md:flex flex-col gap-4">
+            {noCollection.map((c) => (
+              <m.div key={c.id} variants={{ hidden: { opacity: 0, y: reduced ? 0 : 8 }, show: { opacity: 1, y: 0 } }}>
+                <div className="group relative cursor-pointer rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-1)] transition-transform [@media(hover:hover)]:hover:-translate-y-[1px]">
+                  <Link href={`/koleksi/${c.id}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={`Buka koleksi: ${c.name}`} />
+                  <div className="relative z-[1] pointer-events-none">
+                    <div className="mb-3 flex items-start justify-between">
+                      <CollectionIcon icon={c.icon} color={c.color} size={40} />
+                      <div className="pointer-events-auto relative z-[2]">
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="flex h-9 w-9 items-center justify-center rounded-xl opacity-0 transition-opacity group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
+                            <Icon icon={DotsThree} size={18} weight="bold" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem icon={<Icon icon={PencilSimple} size={18} />} onSelect={() => { setEditingId(c.id); setDialogOpen(true); }}>Edit koleksi</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem icon={<Icon icon={Trash} size={18} />} onSelect={() => setDeleteId(c.id)} className="text-rose-600">Hapus koleksi</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      </div>
                     </div>
+                    <div className="font-semibold">{c.name}</div>
+                    <div className="text-xs text-[var(--text-muted)]">{counts?.[c.id] ?? 0} catatan</div>
                   </div>
-                  <div className="font-semibold">{c.name}</div>
-                  <div className="text-xs text-[var(--text-muted)]">{counts?.[c.id] ?? 0} catatan</div>
                 </div>
-              </div>
-            </m.div>
-          ))}
-        </m.div>
+              </m.div>
+            ))}
+          </m.div>
+        </div>
       )}
 
       <CollectionDialog open={dialogOpen} onClose={() => { setDialogOpen(false); setEditingId(null); }} editingId={editingId} key={dialogOpen ? "open" : "closed"} />

@@ -12,7 +12,7 @@ import { useState } from "react";
 import * as React from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Palette, Monitor, Download, Question, Trash, Archive, User, Camera } from "@phosphor-icons/react";
+import { Palette, Monitor, Download, Question, Trash, Archive, User, Camera, Sun, Moon, Desktop } from "@phosphor-icons/react";
 import { Icon } from "@/components/icons";
 import { ACCENT_LABEL, THEME_LABEL } from "@/lib/labels";
 import { cn } from "@/lib/utils";
@@ -34,6 +34,12 @@ const ACCENTS = [
   { id: "cyan", color: "#06b6d4" },
   { id: "fuchsia", color: "#d946ef" },
 ];
+
+const THEME_OPTIONS = [
+  { id: "light", label: "Terang", Icon: Sun },
+  { id: "dark", label: "Gelap", Icon: Moon },
+  { id: "system", label: "Sistem", Icon: Desktop },
+] as const;
 
 export default function PengaturanPage() {
   const { theme, setTheme, setAccent } = useTheme();
@@ -175,19 +181,19 @@ export default function PengaturanPage() {
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-muted)]">Tampilan</h2>
         <SettingsRow icon={<Icon icon={Monitor} size={20} />} label="Tema" description={mounted ? THEME_LABEL[theme] : undefined} layout="stack">
-          <div className="grid grid-cols-3 gap-2 w-full md:grid-cols-1 md:max-w-[200px] mx-auto md:mx-0">
+          <div className="grid grid-cols-3 gap-2 w-full">
             {[
-              { id: "light", label: "Terang", icon: "☀️" },
-              { id: "dark", label: "Gelap", icon: "🌙" },
-              { id: "system", label: "Sistem", icon: "💻" },
+              { id: "light", label: "Terang", Icon: Sun },
+              { id: "dark", label: "Gelap", Icon: Moon },
+              { id: "system", label: "Sistem", Icon: Desktop },
             ].map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTheme(t.id as "light" | "dark" | "system")}
-                className={cn("flex flex-col items-center gap-1.5 p-4 rounded-xl border-2 transition", theme === t.id ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)] hover:bg-[var(--card-muted)]")}
+                className={cn("flex flex-col items-center gap-1.5 p-4 rounded-xl border-2 transition h-21", theme === t.id ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)] hover:bg-[var(--card-muted)]")}
               >
-                <span className="text-2xl">{t.icon}</span>
-                <span className={cn("text-sm font-medium", theme === t.id ? "text-[var(--accent)]" : "text-[var(--foreground)]")}>{t.label}</span>
+                <span className="text-xl">{<t.Icon size={20} weight="regular" />}</span>
+                <span className={cn("text-[11px] font-medium tracking-tight", theme === t.id ? "text-[var(--accent)]" : "text-[var(--foreground)]")}>{t.label}</span>
               </button>
             ))}
           </div>

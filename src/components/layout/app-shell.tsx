@@ -12,7 +12,9 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Avatar } from "@/components/shared/avatar";
 import { useProfile } from "@/stores/profile";
 import { CollectionIcon } from "@/components/shared/collection-icon";
-import { MobileHeader } from "@/components/layout/mobile-header";
+import { HomeMobileHeader } from "@/components/layout/home-mobile-header";
+import { MobilePageTitle } from "@/components/layout/mobile-page-title";
+import { MobileSearchOverlay } from "@/components/layout/mobile-search-overlay";
 import { CollectionPickerProvider, useCollectionPicker } from "@/components/shared/collection-picker-provider";
 import { PencilSimpleLine, House, ClockCounterClockwise, Stack, GearSix, Archive, Trash, NotePencil, CheckSquare, CodeBlock, Lightning, MarkdownLogo, BookOpenText, Microphone, Scribble, Bookmark, Layout, Sidebar, SidebarSimple, Plus, Folder, Briefcase, Lightbulb, Palette, Books, Target, AirplaneTilt, Barbell, FlowerLotus } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
@@ -143,27 +145,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <MobileHeader onSearch={() => setSearchOpen(true)} />
-      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+64px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 md:hidden" style={{ background: "color-mix(in oklch, var(--background) 95%, transparent)", backdropFilter: "blur(4px)" }}>
-          <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--border)]">
-              <input
-                type="text"
-                placeholder="Cari catatan..."
-                className="flex-1 h-12 px-4 rounded-xl bg-[var(--surface-2)] text-[16px] font-medium outline-none"
-                autoFocus
-                style={{ fontSize: "16px" }}
-              />
-              <button onClick={() => setSearchOpen(false)} className="ml-4 flex h-12 items-center justify-center rounded-xl px-4 font-medium text-[var(--text-muted)]">Batal</button>
-            </div>
-            <div className="flex-1 overflow-y-auto px-4 py-4">
-              <p className="text-center text-[var(--text-muted)] py-12">Ketik untuk mencari...</p>
-            </div>
-          </div>
-        </div>
+      {path === "/" && <HomeMobileHeader onSearch={() => setSearchOpen(true)} />}
+      {path !== "/" && !path.startsWith("/catatan/") && (
+        <MobilePageTitle
+          title={path === "/riwayat" ? "Riwayat" : path === "/koleksi" ? "Koleksi" : path === "/arsip" ? "Arsip" : path === "/sampah" ? "Sampah" : path === "/pengaturan" ? "Pengaturan" : ""}
+          description={path === "/riwayat" ? "Catatan yang pernah dibuka" : path === "/koleksi" ? "Kelompokkan catatan Anda" : path === "/arsip" ? "Catatan yang diarsipkan" : path === "/sampah" ? "Dihapus permanen setelah 30 hari" : path === "/pengaturan" ? "Kelola preferensi aplikasi" : ""}
+        />
       )}
+      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+64px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
+      {searchOpen && <MobileSearchOverlay onClose={() => setSearchOpen(false)} />}
 
       {path !== "/catatan" && !path.startsWith("/catatan/") && (
       <nav className="fixed bottom-0 left-16 right-16 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
@@ -186,7 +176,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
       )}
 
-      {path !== "/catatan" && !path.startsWith("/catatan/") && (
+      {(path === "/" || path.startsWith("/koleksi/")) && (
         <button
           onClick={() => newNote("text")}
           aria-label="Catatan baru"
