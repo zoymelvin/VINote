@@ -62,7 +62,8 @@ export default function PengaturanPage() {
   const [unsynced, setUnsynced] = useState<Awaited<ReturnType<typeof listUnsyncedNotes>>>([]);
   const [backupOpen, setBackupOpen] = useState(false);
   const [unsyncedOpen, setUnsyncedOpen] = useState(false);
-  const [mounted] = React.useState(() => typeof window !== "undefined");
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
 
   async function resizeToJpeg(file: File): Promise<Blob> {
     const img = await createImageBitmap(file);
