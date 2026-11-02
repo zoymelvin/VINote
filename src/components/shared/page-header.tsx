@@ -13,7 +13,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, actions, back, onBack, icon }: PageHeaderProps) {
   return (
-    <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <header className="mb-6 hidden md:flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="flex items-center gap-3">
         {back && (
           <button onClick={onBack} className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl hover:bg-[var(--card-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">

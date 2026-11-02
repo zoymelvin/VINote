@@ -268,7 +268,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
 
   return (
     <div ref={editorContainerRef} className={cn("flex flex-col transition-all", focusMode && "opacity-0 pointer-events-none")}>
-      <div className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/90 p-3 backdrop-blur">
+      <div className="sticky top-0 z-20 hidden md:flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/90 p-3 backdrop-blur">
         <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
           <Button variant="ghost" size="sm" onClick={() => setPickerOpen(true)} title="Koleksi"><Icon icon={FolderSimplePlus} size={16} /></Button>
@@ -304,6 +304,49 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
             <Icon icon={isEditing ? Check : PencilSimple} size={16} />
             {isEditing ? "Selesai" : "Edit"}
           </Button>
+        </div>
+      </div>
+
+      <div className="sticky top-0 z-20 md:hidden" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+        <div
+          className="flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/90 p-3 backdrop-blur"
+          style={{ background: "color-mix(in oklch, var(--background) 72%, transparent)", backdropFilter: "blur(18px) saturate(160%)", WebkitBackdropFilter: "blur(18px) saturate(160%)" }}
+        >
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => router.back()}><Icon icon={ArrowLeft} size={18} /></Button>
+            <Button variant="ghost" size="sm" onClick={() => setPickerOpen(true)} title="Koleksi"><Icon icon={FolderSimplePlus} size={16} /></Button>
+            <span className="text-sm text-[var(--text-muted)]">{saving ? "Menyimpan..." : "Tersimpan"}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => router.push(`/catatan/${noteId}/versions`)} title="Riwayat versi"><Icon icon={ClockCounterClockwise} size={16} /></Button>
+            {isEditing && (
+              <Button variant="primary" size="sm" onClick={async () => {
+                const ed = editorRef.current;
+                if (ed) {
+                  setSaving(true);
+                  const text = ed.getText();
+                  await updateNote(noteId, { title: titleRef.current, content: ed.getJSON(), contentText: text });
+                  setSaving(false);
+                }
+                setIsEditing(false);
+                const url = new URL(window.location.href);
+                url.searchParams.delete("mode");
+                window.history.replaceState(null, "", url.pathname + url.search);
+              }}>
+                <Icon icon={Check} size={16} /> Selesai
+              </Button>
+            )}
+            {!isEditing && (
+              <Button variant="secondary" size="sm" onClick={() => {
+                setIsEditing(true);
+                const url = new URL(window.location.href);
+                url.searchParams.set("mode", "edit");
+                window.history.replaceState(null, "", url.pathname + url.search);
+              }}>
+                <Icon icon={PencilSimple} size={16} /> Edit
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -433,7 +476,7 @@ export default function RichEditor({ noteId, initialTitle, initialContent, colle
         </div>
 
         )}
-        <MobileEditorToolbar editor={editor} onTogglePanel={() => setPanelOpen((v) => !v)} panelOpen={panelOpen} />
+        {isEditing && <MobileEditorToolbar editor={editor} onTogglePanel={() => setPanelOpen((v) => !v)} panelOpen={panelOpen} />}
         {showReplace && (
           <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl bg-[var(--card)] p-3">
             <Input placeholder="Cari" className="h-9 w-40" onChange={() => {}} />

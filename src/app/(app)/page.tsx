@@ -93,6 +93,11 @@ export default function Home() {
         <Avatar src={profile.avatarUrl ?? undefined} alt={profile.displayName} initials={initial} size={36} />
       </header>
 
+      <div className="md:hidden px-4 py-4">
+        <h1 className="text-[28px] font-bold tracking-tight">Catatan</h1>
+        <p className="mt-1 text-[12px] text-[var(--text-muted)]">{list.length} catatan · terakhir diubah {new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</p>
+      </div>
+
       {pinned.length > 0 && (
         <section>
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Disematkan · {pinned.length}</h2>

@@ -174,21 +174,36 @@ export default function PengaturanPage() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-muted)]">Tampilan</h2>
-        <SettingsRow icon={<Icon icon={Monitor} size={20} />} label="Tema" description={mounted ? THEME_LABEL[theme] : undefined}>
-          <div className="w-full overflow-x-auto md:w-auto">
-            <Segmented options={[{ id: "light", label: "Terang" }, { id: "dark", label: "Gelap" }, { id: "system", label: "Sistem" }]} value={theme} onChange={(id: string) => setTheme(id as "light" | "dark" | "system")} className="min-w-[200px]" />
+        <SettingsRow icon={<Icon icon={Monitor} size={20} />} label="Tema" description={mounted ? THEME_LABEL[theme] : undefined} layout="stack">
+          <div className="grid grid-cols-3 gap-2 w-full md:grid-cols-1 md:max-w-[200px] mx-auto md:mx-0">
+            {[
+              { id: "light", label: "Terang", icon: "☀️" },
+              { id: "dark", label: "Gelap", icon: "🌙" },
+              { id: "system", label: "Sistem", icon: "💻" },
+            ].map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTheme(t.id as "light" | "dark" | "system")}
+                className={cn("flex flex-col items-center gap-1.5 p-4 rounded-xl border-2 transition", theme === t.id ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)] hover:bg-[var(--card-muted)]")}
+              >
+                <span className="text-2xl">{t.icon}</span>
+                <span className={cn("text-sm font-medium", theme === t.id ? "text-[var(--accent)]" : "text-[var(--foreground)]")}>{t.label}</span>
+              </button>
+            ))}
           </div>
         </SettingsRow>
-        <SettingsRow icon={<Icon icon={Palette} size={20} />} label="Warna aksen">
-          <div className="flex flex-wrap gap-2">
+        <SettingsRow icon={<Icon icon={Palette} size={20} />} label="Warna aksen" layout="stack">
+          <div className="grid grid-cols-4 gap-2 w-full md:grid-cols-12 gap-3 md:gap-2">
             {ACCENTS.map((a) => (
               <button
                 key={a.id}
                 onClick={() => setAccent(a.id)}
-                className={cn("h-11 w-11 min-h-[44px] min-w-[44px] rounded-full border-2 transition", theme === a.id ? "border-[var(--foreground)] scale-110" : "border-transparent")}
+                className={cn("aspect-square rounded-xl border-2 transition flex flex-col items-center justify-center p-2 min-h-[56px]", theme === a.id ? "border-[var(--foreground)] scale-105" : "border-transparent")}
                 style={{ background: a.color }}
                 aria-label={ACCENT_LABEL[a.id] || a.id}
-              />
+              >
+                <span className="text-[11px] font-medium text-white drop-shadow-sm max-w-[100%] truncate w-full">{ACCENT_LABEL[a.id] || a.id}</span>
+              </button>
             ))}
           </div>
         </SettingsRow>

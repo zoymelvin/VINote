@@ -17,11 +17,11 @@ export function MobileHeader({ onSearch }: { onSearch?: () => void }) {
   const isDetail = path.startsWith("/koleksi/") || path.startsWith("/catatan/");
 
   return (
-    <header className="sticky top-0 z-30 md:hidden" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+    <header className="sticky top-0 z-30 md:hidden" data-component="mobile-header" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div
         className="flex items-center justify-between px-4"
         style={{
-          height: "56px",
+          height: "52px",
           background: "color-mix(in oklch, var(--background) 72%, transparent)",
           backdropFilter: "blur(18px) saturate(160%)",
           WebkitBackdropFilter: "blur(18px) saturate(160%)",
@@ -40,11 +40,11 @@ export function MobileHeader({ onSearch }: { onSearch?: () => void }) {
               <button
                 onClick={onSearch}
                 aria-label="Cari"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--surface-2)]"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none"
               >
-                <Icon icon={MagnifyingGlass} size={22} weight="regular" />
+                <Icon icon={MagnifyingGlass} size={20} weight="regular" />
               </button>
-              <Avatar src={profile.avatarUrl ?? undefined} alt={profile.displayName} initials={initial} size={36} />
+              <Avatar src={profile.avatarUrl ?? undefined} alt={profile.displayName} initials={initial} size={32} />
             </div>
           </>
         ) : (
@@ -53,9 +53,9 @@ export function MobileHeader({ onSearch }: { onSearch?: () => void }) {
               <button
                 onClick={() => window.history.back()}
                 aria-label="Kembali"
-                className="flex h-11 w-11 items-center justify-center rounded-full"
+                className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--card-muted)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none"
               >
-                <Icon icon={ArrowLeft} size={22} weight="regular" />
+                <Icon icon={ArrowLeft} size={20} weight="regular" />
               </button>
             )}
             <span className="flex-1 text-center text-[17px] font-semibold truncate">
@@ -65,11 +65,11 @@ export function MobileHeader({ onSearch }: { onSearch?: () => void }) {
               <button
                 onClick={onSearch}
                 aria-label="Cari"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--surface-2)]"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none"
               >
-                <Icon icon={MagnifyingGlass} size={22} weight="regular" />
+                <Icon icon={MagnifyingGlass} size={20} weight="regular" />
               </button>
-              <Avatar src={profile.avatarUrl ?? undefined} alt={profile.displayName} initials={initial} size={36} />
+              <Avatar src={profile.avatarUrl ?? undefined} alt={profile.displayName} initials={initial} size={32} />
             </div>
           </>
         )}

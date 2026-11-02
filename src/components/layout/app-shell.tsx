@@ -31,7 +31,7 @@ const mobileTabs = [
   { href: "/riwayat", label: "Riwayat", icon: ClockCounterClockwise },
   { href: "/koleksi", label: "Koleksi", icon: Stack },
   { href: "/arsip", label: "Arsip", icon: Archive },
-  { href: "/pengaturan", label: "Pengaturan", icon: GearSix },
+  { href: "/pengaturan", label: "Atur", icon: GearSix },
 ];
 
 const noteTypes: { type: string; label: string; icon: React.ComponentType<{ size?: number; weight?: IconWeight; className?: string; [key: string]: unknown }> }[] = [
@@ -52,6 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const collections = useLiveQuery(() => listCollections(), []);
   const profile = useProfile();
   const initial = profile.displayName.charAt(0).toUpperCase();
@@ -142,12 +143,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <MobileHeader />
+      <MobileHeader onSearch={() => setSearchOpen(true)} />
       <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+64px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
+      {searchOpen && (
+        <div className="fixed inset-0 z-50 md:hidden" style={{ background: "color-mix(in oklch, var(--background) 95%, transparent)", backdropFilter: "blur(4px)" }}>
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--border)]">
+              <input
+                type="text"
+                placeholder="Cari catatan..."
+                className="flex-1 h-12 px-4 rounded-xl bg-[var(--surface-2)] text-[16px] font-medium outline-none"
+                autoFocus
+                style={{ fontSize: "16px" }}
+              />
+              <button onClick={() => setSearchOpen(false)} className="ml-4 flex h-12 items-center justify-center rounded-xl px-4 font-medium text-[var(--text-muted)]">Batal</button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-4">
+              <p className="text-center text-[var(--text-muted)] py-12">Ketik untuk mencari...</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {path !== "/catatan" && !path.startsWith("/catatan/") && (
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <div className="mx-4 mb-2 flex items-center justify-around rounded-[32px] border border-[var(--border)] bg-[var(--card)]/70 px-2 py-2 backdrop-blur-xl" style={{ boxShadow: "0 10px 30px -10px rgb(0 0 0 / 0.45)", height: "64px" }}>
+      <nav className="fixed bottom-0 left-16 right-16 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <div className="flex items-center justify-around rounded-[32px] border border-[var(--border)] bg-[var(--card)]/80 px-4 py-3 backdrop-blur-2xl" style={{ boxShadow: "0 10px 30px -10px rgb(0 0 0 / 0.45)", height: "60px" }}>
           {mobileTabs.map((t) => {
             const active = path === t.href;
             return (
@@ -155,10 +175,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={t.href}
                 href={t.href}
                 aria-label={t.label}
-                className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2 py-1 active:scale-95 transition-transform"
+                className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-3 py-1 active:scale-95 transition-transform"
               >
-                <Icon icon={t.icon} size={24} weight={active ? "fill" : "regular"} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
-                <span className={cn("text-[11px] leading-none", active ? "font-medium text-[var(--accent)]" : "text-[var(--text-muted)]")}>{t.label}</span>
+                <Icon icon={t.icon} size={22} weight={active ? "fill" : "regular"} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
+                <span className={cn("text-[10.5px] leading-none", active ? "font-medium text-[var(--accent)]" : "text-[var(--text-muted)]")}>{t.label}</span>
               </Link>
             );
           })}
