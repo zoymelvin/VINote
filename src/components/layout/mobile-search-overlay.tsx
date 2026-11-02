@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { db } from "@/lib/db/db";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
-import { CollectionIcon } from "@/components/shared/collection-icon";
 import { cn } from "@/lib/utils";
+import { CollectionIcon } from "@/components/shared/collection-icon";
 
 export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState("");
@@ -16,14 +16,14 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
-      const load = async () => {
-        const [n, c] = await Promise.all([
-          db.notes.filter((n) => n.deletedAt === null).toArray(),
-          db.folders.toArray(),
-        ]);
-        setNotes(n.map((n) => ({ id: n.id, title: n.title || "", contentText: n.contentText || "", updatedAt: n.updatedAt, color: n.color })));
-        setCollections((c as Array<{ id: string; name: string; icon?: string; color?: string }>));
-      };
+    const load = async () => {
+      const [n, c] = await Promise.all([
+        db.notes.filter((n) => n.deletedAt === null).toArray(),
+        db.folders.toArray(),
+      ]);
+      setNotes(n.map((n) => ({ id: n.id, title: n.title || "", contentText: n.contentText || "", updatedAt: n.updatedAt, color: n.color })));
+      setCollections((c as Array<{ id: string; name: string; icon?: string; color?: string }>));
+    };
     load();
   }, []);
 
@@ -40,8 +40,8 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
       const total = filteredNotes.length + filteredCollections.length;
       if (focusedIndex >= 0 && focusedIndex < total) {
         const item = focusedIndex < filteredNotes.length ? filteredNotes[focusedIndex] : filteredCollections[focusedIndex - filteredNotes.length];
-        if (item.id.startsWith("col:")) {
-          window.location.href = `/koleksi/${item.id.replace("col:", "")}`;
+        if ("icon" in item) {
+          window.location.href = `/koleksi/${item.id}`;
         } else {
           window.location.href = `/catatan/${item.id}?mode=edit`;
         }
@@ -83,16 +83,9 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto py-2">
-          {q.length === 0 ? (
-            <div className="px-5 space-y-3">
-              <p className="text-[12px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Pencarian terbaru</p>
-              <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                {["Disematkan", "Catatan hari ini", "Arsip"].map((label) => (
-                  <button key={label} onClick={() => { setQuery(label); }} className="flex items-center gap-2 rounded-xl bg-[var(--card-muted)] px-3 py-1.5 text-[12px] text-[var(--text-muted)] whitespace-nowrap">
-                    {label}
-                  </button>
-                ))}
-              </div>
+          {query.trim().length === 0 ? (
+            <div className="px-5 py-4 text-center">
+              <p className="text-[14px] text-[var(--text-muted)]">Mulai ketik untuk mencari catatan atau koleksi</p>
             </div>
           ) : (
             <div className="px-5">
@@ -128,7 +121,7 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
                       style={{ minHeight: "56px" }}
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--card-muted)] text-[var(--text-muted)]">
-                        <CollectionIconMini icon={c.icon} color={c.color} />
+                        <CollectionIcon icon={c.icon} color={c.color} size={18} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[14px] font-medium truncate">{c.name}</div>
@@ -150,8 +143,4 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
-}
-
-function CollectionIconMini({ icon, color }: { icon?: string; color?: string }) {
-  return <CollectionIcon icon={icon} color={color} size={24} />;
 }

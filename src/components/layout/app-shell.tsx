@@ -152,12 +152,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           description={path === "/riwayat" ? "Catatan yang pernah dibuka" : path === "/koleksi" ? "Kelompokkan catatan Anda" : path === "/arsip" ? "Catatan yang diarsipkan" : path === "/sampah" ? "Dihapus permanen setelah 30 hari" : path === "/pengaturan" ? "Kelola preferensi aplikasi" : ""}
         />
       )}
-      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+64px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
+      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+72px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
       {searchOpen && <MobileSearchOverlay onClose={() => setSearchOpen(false)} />}
 
       {path !== "/catatan" && !path.startsWith("/catatan/") && (
-      <nav className="fixed bottom-0 left-16 right-16 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <div className="flex items-center justify-around rounded-[32px] border border-[var(--border)] bg-[var(--card)]/80 px-4 py-3 backdrop-blur-2xl" style={{ boxShadow: "0 10px 30px -10px rgb(0 0 0 / 0.45)", height: "60px" }}>
+      <nav className="fixed bottom-0 left-12 right-12 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <div className="flex items-center justify-around rounded-[32px] border border-[var(--border)] bg-[var(--card)]/85 px-4 py-3 backdrop-blur-2xl" style={{ boxShadow: "0 10px 30px -10px rgb(0 0 0 / 0.5)", height: "72px" }}>
           {mobileTabs.map((t) => {
             const active = path === t.href;
             return (
@@ -165,10 +165,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={t.href}
                 href={t.href}
                 aria-label={t.label}
-                className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-3 py-1 active:scale-95 transition-transform"
+                className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-4 py-2 active:scale-95 transition-transform"
               >
-                <Icon icon={t.icon} size={22} weight={active ? "fill" : "regular"} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
-                <span className={cn("text-[10.5px] leading-none", active ? "font-medium text-[var(--accent)]" : "text-[var(--text-muted)]")}>{t.label}</span>
+                <Icon icon={t.icon} size={26} weight={active ? "fill" : "regular"} className={active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
+                <span className={cn("text-[11px] leading-none", active ? "font-medium text-[var(--accent)]" : "text-[var(--text-muted)]")}>{t.label}</span>
               </Link>
             );
           })}

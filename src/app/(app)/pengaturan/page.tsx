@@ -218,20 +218,30 @@ export default function PengaturanPage() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[var(--text-muted)]">Data dan Cadangan</h2>
-        <SettingsRow icon={<Icon icon={Download} size={20} />} label="Ekspor data" description="Simpan cadangan catatan">
-          <Button size="sm" variant="secondary">Ekspor</Button>
+        <SettingsRow icon={<Icon icon={Download} size={20} />} label="Ekspor data" description="Simpan cadangan catatan" layout="stack">
+          <div className="w-full">
+            <Button size="sm" variant="secondary" className="w-full">Ekspor</Button>
+          </div>
         </SettingsRow>
-        <SettingsRow icon={<Icon icon={Download} size={20} />} label="Pulihkan dari cadangan lokal" description="Daftar cadangan yang tersimpan">
-          <Button size="sm" variant="secondary" onClick={() => { loadBackups(); setBackupOpen(true); }}>Buka</Button>
+        <SettingsRow icon={<Icon icon={Download} size={20} />} label="Pulihkan dari cadangan lokal" description="Daftar cadangan yang tersimpan" layout="stack">
+          <div className="w-full">
+            <Button size="sm" variant="secondary" className="w-full" onClick={() => { loadBackups(); setBackupOpen(true); }}>Buka</Button>
+          </div>
         </SettingsRow>
-        <SettingsRow icon={<Icon icon={Download} size={20} />} label="Periksa catatan yang belum tersinkron" description="Daftar catatan lokal/gagal">
-          <Button size="sm" variant="secondary" onClick={() => { loadUnsynced(); setUnsyncedOpen(true); }}>Buka</Button>
+        <SettingsRow icon={<Icon icon={Download} size={20} />} label="Periksa catatan yang belum tersinkron" description="Daftar catatan lokal/gagal" layout="stack">
+          <div className="w-full">
+            <Button size="sm" variant="secondary" className="w-full" onClick={() => { loadUnsynced(); setUnsyncedOpen(true); }}>Buka</Button>
+          </div>
         </SettingsRow>
-        <SettingsRow icon={<Icon icon={Archive} size={20} />} label="Arsip" description="Catatan yang diarsipkan">
-          <Button size="sm" variant="secondary" onClick={() => router.push("/arsip")}>Buka</Button>
+        <SettingsRow icon={<Icon icon={Archive} size={20} />} label="Arsip" description="Catatan yang diarsipkan" layout="stack">
+          <div className="w-full">
+            <Button size="sm" variant="secondary" className="w-full" onClick={() => router.push("/arsip")}>Buka</Button>
+          </div>
         </SettingsRow>
-        <SettingsRow icon={<Icon icon={Trash} size={20} />} label="Sampah" description="Catatan yang dihapus">
-          <Button size="sm" variant="secondary" onClick={() => router.push("/sampah")}>Buka</Button>
+        <SettingsRow icon={<Icon icon={Trash} size={20} />} label="Sampah" description="Catatan yang dihapus" layout="stack">
+          <div className="w-full">
+            <Button size="sm" variant="secondary" className="w-full" onClick={() => router.push("/sampah")}>Buka</Button>
+          </div>
         </SettingsRow>
       </section>
 
