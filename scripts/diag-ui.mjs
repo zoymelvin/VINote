@@ -64,6 +64,7 @@ const history = await page.evaluate(async () => {
   });
   return (all || []).filter((n) => n.isArchived).map((n) => ({ id: n.id, title: n.title, isArchived: n.isArchived, deletedAt: n.deletedAt }));
 });
+// eslint-disable-next-line react-hooks/exhaustive-deps
 await dump("archived-notes-in-dexie", async () => history);
 
 const profileStores = await page.evaluate(async () => {

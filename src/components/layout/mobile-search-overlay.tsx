@@ -5,13 +5,14 @@ import { Icon } from "@/components/icons";
 import { db } from "@/lib/db/db";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { NoteTypeIcon } from "@/components/shared/note-type-icon";
 import { CollectionIcon } from "@/components/shared/collection-icon";
 
 export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [notes, setNotes] = useState<Array<{ id: string; title: string; contentText?: string | null; updatedAt: number; color?: string }>>([]);
+  const [notes, setNotes] = useState<Array<{ id: string; title: string; contentText?: string | null; updatedAt: number; color?: string; type?: string }>>([]);
   const [collections, setCollections] = useState<Array<{ id: string; name: string; icon?: string; color?: string }>>([]);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
         db.notes.filter((n) => n.deletedAt === null).toArray(),
         db.folders.toArray(),
       ]);
-      setNotes(n.map((n) => ({ id: n.id, title: n.title || "", contentText: n.contentText || "", updatedAt: n.updatedAt, color: n.color })));
+      setNotes(n.map((n) => ({ id: n.id, title: n.title || "", contentText: n.contentText || "", updatedAt: n.updatedAt, color: n.color, type: n.type })));
       setCollections((c as Array<{ id: string; name: string; icon?: string; color?: string }>));
     };
     load();
@@ -83,7 +84,7 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
             Batal
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto py-2">
+        <div className="flex-1 overflow-y-auto py-2" style={{ overflowX: "hidden" }}>
           {query.trim().length === 0 ? (
             <div className="px-5 py-4 text-center">
               <p className="text-[14px] text-[var(--text-muted)]">Mulai ketik untuk mencari catatan atau koleksi</p>
@@ -97,11 +98,11 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
                     <button
                       key={n.id}
                       onClick={() => { window.location.href = `/catatan/${n.id}?mode=edit`; onClose(); }}
-                      className={cn("flex items-center gap-3 px-5 py-3 border-b border-[var(--border)/50]", focusedIndex === i && "bg-[var(--accent-soft)]")}
+                      className={cn("flex items-center gap-3 px-5 py-3 border-b border-[var(--border)/50] last:border-b-0", focusedIndex === i && "bg-[var(--accent-soft)]")}
                       style={{ minHeight: "56px" }}
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--card-muted)] text-[var(--text-muted)]">
-                        <CollectionIcon icon={n.color && n.color !== "polos" ? n.color : "polos"} size={18} />
+                        <NoteTypeIcon type={n.type || "text"} size={18} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[14px] font-medium truncate">{n.title}</div>
@@ -118,7 +119,7 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
                     <button
                       key={c.id}
                       onClick={() => { window.location.href = `/koleksi/${c.id}`; onClose(); }}
-                      className={cn("flex items-center gap-3 px-5 py-3 border-b border-[var(--border)/50]", focusedIndex === filteredNotes.length + i && "bg-[var(--accent-soft)]")}
+                      className={cn("flex items-center gap-3 px-5 py-3 border-b border-[var(--border)/50] last:border-b-0", focusedIndex === filteredNotes.length + i && "bg-[var(--accent-soft)]")}
                       style={{ minHeight: "56px" }}
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--card-muted)] text-[var(--text-muted)]">

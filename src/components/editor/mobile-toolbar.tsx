@@ -2,7 +2,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/icons";
-import { TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, ImageSquare, CaretDown, ArrowCounterClockwise, ArrowClockwise, Link as PhosphorLinkIcon } from "@phosphor-icons/react";
+import { TextHOne, TextHTwo, TextHThree, TextB, TextItalic, TextUnderline, TextStrikethrough, CodeBlock, ListBullets, ListNumbers, CheckSquare, Quotes, BracketsSquare, AlignLeft, TextAlignCenter, AlignRight, TextAlignJustify, ImageSquare, CaretDown, ArrowCounterClockwise, ArrowClockwise, Link as PhosphorLinkIcon, Eraser } from "@phosphor-icons/react";
 import type { Editor } from "@tiptap/core";
 
 const TOOLS = [
@@ -51,6 +51,67 @@ export function MobileEditorToolbar({ editor, onTogglePanel, panelOpen }: { edit
     }
   };
 
+  // Panel items organized in 3 rows - only items NOT in the main bar
+  const PANEL_ROW_1 = [
+    { icon: TextHOne, label: "H1", action: () => ed.chain().focus().toggleHeading({ level: 1 }).run() },
+    { icon: TextHTwo, label: "H2", action: () => ed.chain().focus().toggleHeading({ level: 2 }).run() },
+    { icon: TextHThree, label: "H3", action: () => ed.chain().focus().toggleHeading({ level: 3 }).run() },
+    { icon: TextStrikethrough, label: "Coret", action: () => ed.chain().focus().toggleStrike().run() },
+    { icon: CodeBlock, label: "Kode", action: () => ed.chain().focus().toggleCode().run() },
+    { icon: Quotes, label: "Kutipan", action: () => ed.chain().focus().toggleBlockquote().run() },
+    { icon: BracketsSquare, label: "Blok Kode", action: () => ed.chain().focus().toggleCodeBlock().run() },
+    { icon: PhosphorLinkIcon, label: "Tautan", action: () => ed.chain().focus().setLink({ href: "" }).run() },
+  ];
+
+  const PANEL_ROW_2 = [
+    { icon: CodeBlock, label: "Blok Kode", action: () => ed.chain().focus().toggleCodeBlock().run() },
+    { icon: ListBullets, label: "Bullet", action: () => ed.chain().focus().toggleBulletList().run() },
+    { icon: ListNumbers, label: "Bernomor", action: () => ed.chain().focus().toggleOrderedList().run() },
+    { icon: CheckSquare, label: "Checklist", action: () => ed.chain().focus().toggleTaskList().run() },
+    { icon: AlignLeft, label: "Rata Kiri", action: () => ed.chain().focus().setTextAlign("left").run() },
+    { icon: TextAlignCenter, label: "Rata Tengah", action: () => ed.chain().focus().setTextAlign("center").run() },
+    { icon: AlignRight, label: "Rata Kanan", action: () => ed.chain().focus().setTextAlign("right").run() },
+    { icon: TextAlignJustify, label: "Rata Kanan-Kiri", action: () => ed.chain().focus().setTextAlign("justify").run() },
+  ];
+
+  const PANEL_ROW_3 = [
+    { icon: ImageSquare, label: "Gambar", action: () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = () => ed.chain().focus().setImage({ src: reader.result as string }).run();
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+    }},
+    { icon: ArrowCounterClockwise, label: "Urungkan", action: () => ed.chain().focus().undo().run() },
+    { icon: ArrowClockwise, label: "Ulangi", action: () => ed.chain().focus().redo().run() },
+  ];
+
+  const renderPanelRow = (items: Array<{ icon: any; label: string; action: () => void }>) => (
+    <div className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto scrollbar-none" style={{ scrollbarWidth: "none" }}>
+      {items.map((item, idx) => (
+        <button
+          key={idx}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={item.action}
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+            "text-[var(--text-muted)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent)]"
+          )}
+          aria-label={item.label}
+        >
+          <Icon icon={item.icon} size={18} weight="regular" />
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="md:hidden" suppressHydrationWarning>
       <div
@@ -98,27 +159,10 @@ export function MobileEditorToolbar({ editor, onTogglePanel, panelOpen }: { edit
         }}
       >
         <div className="overflow-hidden" style={{ minHeight: 0 }}>
-          <div className="flex flex-wrap items-center gap-1 border-t border-[var(--border)] p-2">
-            <div className="relative">
-              <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().toggleHeading({ level: 1 }).run()} className={cn("flex h-10 px-3 items-center rounded-lg", ed.isActive("heading", { level: 1 }) ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}>H1</button>
-              <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().toggleHeading({ level: 2 }).run()} className={cn("flex h-10 px-3 items-center rounded-lg", ed.isActive("heading", { level: 2 }) ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}>H2</button>
-              <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().toggleHeading({ level: 3 }).run()} className={cn("flex h-10 px-3 items-center rounded-lg", ed.isActive("heading", { level: 3 }) ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}>H3</button>
-            </div>
-            <span className="w-px h-6 bg-[var(--border)]" />
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().toggleStrike().run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive("strike") ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={TextStrikethrough} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().toggleCode().run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive("code") ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={CodeBlock} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().toggleBlockquote().run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive("blockquote") ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={Quotes} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().toggleCodeBlock().run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive("codeBlock") ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={BracketsSquare} size={18} /></button>
-            <span className="w-px h-6 bg-[var(--border)]" />
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().setTextAlign("left").run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive({ textAlign: "left" }) ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={AlignLeft} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().setTextAlign("center").run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive({ textAlign: "center" }) ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={TextAlignCenter} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().setTextAlign("right").run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive({ textAlign: "right" }) ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={AlignRight} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().setTextAlign("justify").run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive({ textAlign: "justify" }) ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={TextAlignJustify} size={18} /></button>
-            <span className="w-px h-6 bg-[var(--border)]" />
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().setLink({ href: "" }).run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", ed.isActive("link") ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-muted)]")}><Icon icon={PhosphorLinkIcon} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().undo().run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", "text-[var(--text-muted)]")}><Icon icon={ArrowCounterClockwise} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().redo().run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", "text-[var(--text-muted)]")}><Icon icon={ArrowClockwise} size={18} /></button>
-            <button onMouseDown={(e) => e.preventDefault()} onClick={() => ed.chain().focus().toggleCode().run()} className={cn("flex h-10 w-10 items-center justify-center rounded-lg", "text-[var(--text-muted)]")}><Icon icon={CodeBlock} size={18} /></button>
+          <div className="flex flex-col gap-1 border-t border-[var(--border)] p-2">
+            {renderPanelRow(PANEL_ROW_1)}
+            {renderPanelRow(PANEL_ROW_2)}
+            {renderPanelRow(PANEL_ROW_3)}
           </div>
         </div>
       </div>

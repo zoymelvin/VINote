@@ -11,10 +11,7 @@ export function HomeMobileHeader({ onSearch }: { onSearch?: () => void }) {
   const profile = useProfile();
   const initial = profile.displayName.charAt(0).toUpperCase();
 
-  if (path !== "/") return null;
-
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isPressed, setIsPressed] = React.useState(false);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -24,17 +21,17 @@ export function HomeMobileHeader({ onSearch }: { onSearch?: () => void }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  if (path !== "/") return null;
+
   return (
 <header
         className="md:hidden"
         suppressHydrationWarning
         style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
+          position: "static",
           paddingTop: "calc(env(safe-area-inset-top) + 12px)",
-          paddingBottom: "8px",
-          background: "linear-gradient(180deg, var(--background), transparent)",
+          paddingBottom: "4px",
+          background: "transparent",
           border: "none",
           boxShadow: "none",
           backdropFilter: "none",
@@ -81,14 +78,14 @@ export function HomeMobileHeader({ onSearch }: { onSearch?: () => void }) {
             VINOTE
           </span>
         </div>
-        <div className="flex items-center" style={{ gap: "12px" }}>
+        <div className="flex items-center" style={{ gap: "10px" }}>
           <button
             onClick={onSearch}
             aria-label="Cari"
             className="flex items-center justify-center rounded-full transition-all duration-200"
             style={{
-              width: "42px",
-              height: "42px",
+              width: "40px",
+              height: "40px",
               background: "color-mix(in oklch, var(--surface) 82%, transparent)",
               border: "1px solid color-mix(in oklch, var(--border) 50%, transparent)",
               outline: "none",
@@ -101,8 +98,8 @@ export function HomeMobileHeader({ onSearch }: { onSearch?: () => void }) {
             src={profile.avatarUrl ?? undefined}
             alt={profile.displayName}
             initials={initial}
-            size={34}
-            className="ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--background)] transition-transform duration-200"
+            size={32}
+            className="transition-transform duration-200"
           />
         </div>
       </div>
