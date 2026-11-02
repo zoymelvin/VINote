@@ -152,12 +152,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           description={path === "/riwayat" ? "Catatan yang pernah dibuka" : path === "/koleksi" ? "Kelompokkan catatan Anda" : path === "/arsip" ? "Catatan yang diarsipkan" : path === "/sampah" ? "Dihapus permanen setelah 30 hari" : path === "/pengaturan" ? "Kelola preferensi aplikasi" : ""}
         />
       )}
-      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+72px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
+      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+8px+64px+24px+72px)] md:pb-6 min-w-0 overflow-y-auto">{children}</main>
       {searchOpen && <MobileSearchOverlay onClose={() => setSearchOpen(false)} />}
 
       {path !== "/catatan" && !path.startsWith("/catatan/") && (
-      <nav className="fixed bottom-0 left-12 right-12 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <div className="flex items-center justify-around rounded-[32px] border border-[var(--border)] bg-[var(--card)]/85 px-4 py-3 backdrop-blur-2xl" style={{ boxShadow: "0 10px 30px -10px rgb(0 0 0 / 0.5)", height: "72px" }}>
+      <nav className="fixed bottom-0 left-12 right-12 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} suppressHydrationWarning>
+        <div className="flex items-center justify-around rounded-[32px] border border-[var(--border)] bg-[var(--card)]/85 px-4 py-3 backdrop-blur-2xl" style={{ boxShadow: "0 10px 30px -10px rgb(0 0 0 / 0.5)", height: "72px" }} suppressHydrationWarning>
           {mobileTabs.map((t) => {
             const active = path === t.href;
             return (
@@ -177,15 +177,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
 
       {(path === "/" || path.startsWith("/koleksi/")) && (
-        <button
+<button
           onClick={() => newNote("text")}
           aria-label="Catatan baru"
           className="fixed z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg md:hidden"
           style={{
             right: "16px",
-            bottom: "calc(env(safe-area-inset-bottom) + 8px + 64px + 16px)",
+            bottom: "calc(env(safe-area-inset-bottom) + 8px + 72px + 16px)",
             background: "linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 85%, black))",
           }}
+          suppressHydrationWarning
         >
           <Icon icon={PencilSimpleLine} size={24} weight="bold" />
         </button>

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 export function MobilePageTitle({ title, description, back, onBack, actions }: { title: string; description?: string; back?: boolean; onBack?: () => void; actions?: React.ReactNode }) {
   return (
-    <div className="md:hidden" style={{ paddingTop: "calc(env(safe-area-inset-top) + 16px)", paddingInline: "16px" }}>
+    <div className="md:hidden" style={{ paddingTop: "calc(env(safe-area-inset-top) + 16px)", paddingInline: "16px" }} suppressHydrationWarning>
       <div className="flex items-center gap-2">
         {back && (
           <Link

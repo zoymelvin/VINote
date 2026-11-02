@@ -25,23 +25,25 @@ export function HomeMobileHeader({ onSearch }: { onSearch?: () => void }) {
   }, []);
 
   return (
-    <header
-      className="md:hidden"
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 50,
-        paddingTop: "calc(env(safe-area-inset-top) + 8px)",
-        paddingBottom: "8px",
-        background: "linear-gradient(180deg, var(--background), transparent)",
-        border: "none",
-        boxShadow: "none",
-        backdropFilter: "none",
-        WebkitBackdropFilter: "none",
-      }}
+<header
+        className="md:hidden"
+        suppressHydrationWarning
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          paddingTop: "calc(env(safe-area-inset-top) + 12px)",
+          paddingBottom: "8px",
+          background: "linear-gradient(180deg, var(--background), transparent)",
+          border: "none",
+          boxShadow: "none",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+        }}
     >
-      <div
+<div
         className="flex items-center justify-between"
+        suppressHydrationWarning
         style={{
           paddingInline: "16px",
           minHeight: "52px",

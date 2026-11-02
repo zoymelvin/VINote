@@ -56,8 +56,9 @@ export function MobileSearchOverlay({ onClose }: { onClose: () => void }) {
       className="fixed inset-0 z-60 md:hidden"
       style={{ background: "oklch(0 0 0 / 0.4)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
       onClick={onClose}
+      suppressHydrationWarning
     >
-      <div className="fixed top-[calc(env(safe-area-inset-top)+8px)] left-[12px] right-[12px] z-61 max-h-[70dvh] flex flex-col border border-[var(--border)] bg-[var(--surface)] rounded-[24px] shadow-2xl backdrop-blur-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="fixed top-[calc(env(safe-area-inset-top)+8px)] left-[12px] right-[12px] z-61 max-h-[70dvh] flex flex-col border border-[var(--border)] bg-[var(--surface)] rounded-[24px] shadow-2xl backdrop-blur-2xl overflow-hidden" onClick={(e) => e.stopPropagation()} suppressHydrationWarning>
         <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--border)] bg-[var(--surface)]">
           <div className="flex-1 relative">
             <Icon icon={MagnifyingGlass} size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />

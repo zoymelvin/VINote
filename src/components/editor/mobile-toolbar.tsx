@@ -52,7 +52,7 @@ export function MobileEditorToolbar({ editor, onTogglePanel, panelOpen }: { edit
   };
 
   return (
-    <div className="md:hidden">
+    <div className="md:hidden" suppressHydrationWarning>
       <div
         className="flex items-center border-t border-[var(--border)] bg-[var(--card)]"
         style={{
@@ -61,6 +61,7 @@ export function MobileEditorToolbar({ editor, onTogglePanel, panelOpen }: { edit
           top: "calc(52px + env(safe-area-inset-top))",
           zIndex: 20,
         }}
+        suppressHydrationWarning
       >
         <div className="flex flex-1 items-center gap-1 overflow-x-auto overflow-y-hidden px-2 scrollbar-none" style={{ scrollbarWidth: "none" }}>
           {TOOLS.map((t) => (
